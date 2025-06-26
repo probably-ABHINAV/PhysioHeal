@@ -8,8 +8,10 @@ import { useState, useEffect } from "react"
 export function WhatsAppFloat() {
   const [isVisible, setIsVisible] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
     const timer = setTimeout(() => {
       setIsVisible(true)
       // Show tooltip after 3 seconds for first-time users
@@ -39,7 +41,7 @@ export function WhatsAppFloat() {
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {isVisible && isClient && (
         <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end space-y-3">
           {/* Tooltip */}
           <AnimatePresence>

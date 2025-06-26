@@ -1,11 +1,13 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+
+import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js"
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 /** Only create the client if the required env vars exist. */
 export const supabase: SupabaseClient | null =
-  supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null
+  supabaseUrl && supabaseAnonKey ? createSupabaseClient(supabaseUrl, supabaseAnonKey) : null
 
 export interface Review {
   id: string
@@ -24,7 +26,7 @@ export async function getReviews(): Promise<Review[]> {
         id: "demo",
         name: "Demo Patient",
         rating: 5,
-        comment: "Supabase isn’t configured yet. Showing demo review.",
+        comment: "Supabase isn't configured yet. Showing demo review.",
         service: "Pain Management",
         created_at: new Date().toISOString(),
       },
@@ -35,7 +37,7 @@ export async function getReviews(): Promise<Review[]> {
 
   // --- graceful fallback if the table is missing ---
   if (error) {
-    // Postgres error code 42P01 = “relation does not exist”
+    // Postgres error code 42P01 = "relation does not exist"
     if ((error as any).code === "42P01" || /does not exist/i.test(error.message)) {
       console.warn(
         'Supabase: "reviews" table is missing – returning empty list. ' +
@@ -84,4 +86,77 @@ Falling back to local mock. – ${error.message}`,
   }
 
   return data
+}
+
+// Client-side Supabase client for auth and real-time features
+export const createClient = () => {
+  return createClientComponentClient()
+}
+
+export type Database = {
+  public: {
+    Tables: {
+      appointments: {
+        Row: {
+          id: string
+          name: string
+          phone: string
+          email: string | null
+          reason: string
+          preferred_time: string
+          created_at: string
+          status: 'pending' | 'seen'
+        }
+        Insert: {
+          id?: string
+          name: string
+          phone: string
+          email?: string | null
+          reason: string
+          preferred_time: string
+          created_at?: string
+          status?: 'pending' | 'seen'
+        }
+        Update: {
+          id?: string
+          name?: string
+          phone?: string
+          email?: string | null
+          reason?: string
+          preferred_time?: string
+          created_at?: string
+          status?: 'pending' | 'seen'
+        }
+      }
+      messages: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          phone: string | null
+          message: string
+          status: 'pending' | 'read'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          phone?: string | null
+          message: string
+          status?: 'pending' | 'read'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          phone?: string | null
+          message?: string
+          status?: 'pending' | 'read'
+          created_at?: string
+        }
+      }
+    }
+  }
 }
