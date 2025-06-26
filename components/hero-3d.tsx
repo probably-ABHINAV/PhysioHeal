@@ -23,7 +23,7 @@ export function Hero3D() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current || window.innerWidth < 768) return
+      if (!containerRef.current || isMobile) return
 
       const rect = containerRef.current.getBoundingClientRect()
       const centerX = rect.left + rect.width / 2
@@ -39,18 +39,45 @@ export function Hero3D() {
       rotateY.set(mouseX * 5)
     }
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true })
-    return () => window.removeEventListener("mousemove", handleMouseMove)
+    if (typeof window !== 'undefined') {
+      window.addEventListener("mousemove", handleMouseMove, { passive: true })
+      return () => window.removeEventListener("mousemove", handleMouseMove)
+    }
   }, [x, rotateX, rotateY])
 
   // Reduced particles for mobile performance
-  const particles = Array.from({ length: window.innerWidth < 768 ? 20 : 50 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    delay: Math.random() * 2,
-  }))
+  const [particles, setParticles] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    delay: number;
+  }>>([])
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', checkMobile)
+      return () => window.removeEventListener('resize', checkMobile)
+    }
+  }, [])
+
+  useEffect(() => {
+    const particleCount = isMobile ? 20 : 50
+    const newParticles = Array.from({ length: particleCount }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      delay: Math.random() * 2,
+    }))
+    setParticles(newParticles)
+  }, [isMobile])
 
   return (
     <motion.section
@@ -94,7 +121,7 @@ export function Hero3D() {
             rotate: [0, 180, 360],
           }}
           transition={{
-            duration: window.innerWidth < 768 ? 15 : 20,
+            duration: isMobile ? 15 : 20,
             repeat: Number.POSITIVE_INFINITY,
             ease: "linear",
           }}
@@ -106,7 +133,7 @@ export function Hero3D() {
             rotate: [360, 180, 0],
           }}
           transition={{
-            duration: window.innerWidth < 768 ? 20 : 25,
+            duration: isMobile ? 20 : 25,
             repeat: Number.POSITIVE_INFINITY,
             ease: "linear",
           }}
@@ -310,7 +337,7 @@ export function Hero3D() {
                       rotate: [0, 360],
                     }}
                     transition={{
-                      duration: window.innerWidth < 768 ? 15 : 20,
+                      duration: 20,
                       repeat: Number.POSITIVE_INFINITY,
                       ease: "linear",
                     }}
@@ -376,7 +403,7 @@ export function Hero3D() {
                       color: "bg-green-500",
                     },
                   ]
-                    .slice(0, window.innerWidth < 768 ? 3 : 4)
+                    .slice(0, isMobile ? 3 : 4)
                     .map((element, index) => (
                       <motion.div
                         key={index}
@@ -416,7 +443,7 @@ export function Hero3D() {
                     ))}
 
                   {/* Floating Particles - Hidden on mobile */}
-                  {window.innerWidth >= 768 &&
+                  {!isMobile &&
                     Array.from({ length: 15 }, (_, i) => (
                       <motion.div
                         key={i}
