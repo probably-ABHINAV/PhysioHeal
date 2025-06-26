@@ -1,0 +1,13 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /diagnostics
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+
+# Host
+Host: https://physioheal.com
+
+# Sitemaps
+Sitemap: https://physioheal.com/sitemap.xml
