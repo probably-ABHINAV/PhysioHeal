@@ -1,6 +1,5 @@
 
 import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js"
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -90,7 +89,10 @@ Falling back to local mock. – ${error.message}`,
 
 // Client-side Supabase client for auth and real-time features
 export const createClient = () => {
-  return createClientComponentClient()
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+  return createSupabaseClient(supabaseUrl, supabaseAnonKey)
 }
 
 export type Database = {
