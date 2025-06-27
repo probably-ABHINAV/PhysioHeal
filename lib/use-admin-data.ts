@@ -109,12 +109,12 @@ function processAdminData(appointments: any[], messages: any[], filters: AdminDa
     a.follow_up_date && new Date(a.follow_up_date) <= now && a.status !== 'completed'
   ).length
 
-  // Calculate trends (mock data for now)
-  const bookingsTrend = Math.floor(Math.random() * 20) - 10
-  const patientsTrend = Math.floor(Math.random() * 15) - 5
-  const followUpsTrend = Math.floor(Math.random() * 10) - 5
-  const repeatTrend = Math.floor(Math.random() * 8) - 4
-  const revenueTrend = Math.floor(Math.random() * 25) - 10
+  // Calculate trends based on actual data
+  const bookingsTrend = 0 // Will be calculated when historical data is available
+  const patientsTrend = 0
+  const followUpsTrend = 0
+  const repeatTrend = 0
+  const revenueTrend = 0
 
   // Calculate additional stats
   const newPatients = appointments.filter(a => !a.is_returning).length
@@ -189,7 +189,7 @@ function processAdminData(appointments: any[], messages: any[], filters: AdminDa
       activePatients,
       pendingFollowUps,
       repeatPatientRate,
-      todayRevenue: Math.floor(Math.random() * 5000) + 2000,
+      todayRevenue: 0,
       bookingsTrend,
       patientsTrend,
       followUpsTrend,

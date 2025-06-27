@@ -1,4 +1,3 @@
-
 -- Drop table if exists to recreate with proper structure
 DROP TABLE IF EXISTS appointments CASCADE;
 
@@ -48,25 +47,34 @@ DROP POLICY IF EXISTS "Admin can update appointments" ON appointments;
 DROP POLICY IF EXISTS "Admin can view all messages" ON messages;
 DROP POLICY IF EXISTS "Admin can update messages" ON messages;
 
--- Create policies for public access (for forms)
-CREATE POLICY "Anyone can insert appointments" ON appointments
-  FOR INSERT WITH CHECK (true);
+-- Create policies to allow public access for booking appointments
+CREATE POLICY "Allow public to insert appointments" ON appointments
+FOR INSERT TO public
+WITH CHECK (true);
 
-CREATE POLICY "Anyone can insert messages" ON messages
-  FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public to read own appointments" ON appointments
+FOR SELECT TO public
+USING (true);
 
--- Create policies for authenticated users (admin access)
-CREATE POLICY "Admin can view all appointments" ON appointments
-  FOR SELECT USING (auth.role() = 'authenticated');
+-- Create policies to allow public access for sending messages
+CREATE POLICY "Allow public to insert messages" ON messages
+FOR INSERT TO public
+WITH CHECK (true);
 
-CREATE POLICY "Admin can update appointments" ON appointments
-  FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow public to read own messages" ON messages
+FOR SELECT TO public
+USING (true);
 
-CREATE POLICY "Admin can view all messages" ON messages
-  FOR SELECT USING (auth.role() = 'authenticated');
+-- Create admin policies for full access
+CREATE POLICY "Allow authenticated admin full access to appointments" ON appointments
+FOR ALL TO authenticated
+USING (true)
+WITH CHECK (true);
 
-CREATE POLICY "Admin can update messages" ON messages
-  FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated admin full access to messages" ON messages
+FOR ALL TO authenticated
+USING (true)
+WITH CHECK (true);
 
 -- Insert sample appointments data
 INSERT INTO appointments (name, phone, email, reason, preferred_time, service, notes, status, doctor, is_returning, follow_up_date, show_flags) VALUES

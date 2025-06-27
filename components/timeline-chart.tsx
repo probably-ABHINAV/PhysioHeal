@@ -22,65 +22,7 @@ interface TimelineChartProps {
 }
 
 export function TimelineChart({ data = [] }: TimelineChartProps) {
-  // Sample data if none provided
-  const sampleData: TimelineEvent[] = [
-    {
-      id: '1',
-      time: '09:00',
-      patient_name: 'Riya Sharma',
-      type: 'appointment',
-      status: 'completed',
-      duration: 60,
-      doctor: 'Dr. Patel'
-    },
-    {
-      id: '2',
-      time: '10:30',
-      patient_name: 'Amit Kumar',
-      type: 'therapy',
-      status: 'completed',
-      duration: 45,
-      doctor: 'Dr. Singh'
-    },
-    {
-      id: '3',
-      time: '11:45',
-      patient_name: 'Priya Mehta',
-      type: 'consultation',
-      status: 'in-progress',
-      duration: 30,
-      doctor: 'Dr. Patel'
-    },
-    {
-      id: '4',
-      time: '14:00',
-      patient_name: 'Rahul Gupta',
-      type: 'appointment',
-      status: 'upcoming',
-      duration: 60,
-      doctor: 'Dr. Sharma'
-    },
-    {
-      id: '5',
-      time: '15:30',
-      patient_name: 'Neha Singh',
-      type: 'follow-up',
-      status: 'upcoming',
-      duration: 30,
-      doctor: 'Dr. Singh'
-    },
-    {
-      id: '6',
-      time: '16:30',
-      patient_name: 'Vikram Patel',
-      type: 'therapy',
-      status: 'upcoming',
-      duration: 45,
-      doctor: 'Dr. Patel'
-    }
-  ]
-
-  const timelineData = data.length > 0 ? data : sampleData
+  const timelineData = data
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -213,9 +155,9 @@ export function TimelineChart({ data = [] }: TimelineChartProps) {
             {timelineData.length === 0 && (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No appointments today</h3>
+                <h3 className="text-lg font-medium mb-2">No appointments scheduled</h3>
                 <p className="text-muted-foreground">
-                  The schedule is clear for today
+                  Appointments will appear here once patients start booking
                 </p>
               </div>
             )}

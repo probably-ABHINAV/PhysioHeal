@@ -51,8 +51,8 @@ export default function LoginForm() {
           description: "Welcome back, Admin!",
         })
 
-        // Redirect to requested page or home
-        router.push(redirectTo)
+        // Redirect to requested page or admin dashboard
+        router.push(redirectTo === '/' ? '/admin' : redirectTo)
         return
       }
 
