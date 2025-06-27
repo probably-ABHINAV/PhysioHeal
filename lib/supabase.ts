@@ -80,33 +80,33 @@ export type Database = {
       reviews: {
         Row: {
           id: string
-          name: string | null
+          name: string
+          email: string | null
           rating: number
-          comment: string
-          service: string | null
-          created_at: string
-          user_id: string | null
+          review_text: string
           approved: boolean
+          created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
-          name?: string | null
+          name: string
+          email?: string | null
           rating: number
-          comment: string
-          service?: string | null
-          created_at?: string
-          user_id?: string | null
+          review_text: string
           approved?: boolean
+          created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
-          name?: string | null
+          name?: string
+          email?: string | null
           rating?: number
-          comment?: string
-          service?: string | null
-          created_at?: string
-          user_id?: string | null
+          review_text?: string
           approved?: boolean
+          created_at?: string
+          updated_at?: string
         }
       }
       diagnostic_logs: {
@@ -285,10 +285,10 @@ export interface Review {
   id: string
   name: string | null
   rating: number
-  comment: string
-  service: string | null
+  review_text: string
+  email: string | null
   created_at: string
-  user_id: string | null
+  updated_at: string
   approved: boolean
 }
 
@@ -299,10 +299,10 @@ export async function getReviews(approved: boolean = true): Promise<Review[]> {
         id: "demo",
         name: "Demo Patient",
         rating: 5,
-        comment: "Supabase isn't configured yet. Showing demo review.",
-        service: "Pain Management",
+        review_text: "Supabase isn't configured yet. Showing demo review.",
+        email: "demo@example.com",
         created_at: new Date().toISOString(),
-        user_id: null,
+        updated_at: new Date().toISOString(),
         approved: true
       },
     ]
@@ -374,9 +374,11 @@ export async function createUserProfile(user: {
 }): Promise<Database['public']['Tables']['profiles']['Row'] | null> {
   if (!supabase) return null
 
+  // In production, profiles are created automatically via trigger
+  // This function is mainly for manual profile creation or updates
   const { data, error } = await supabase
     .from('profiles')
-    .insert([{
+    .upsert([{
       id: user.id,
       email: user.email,
       role: user.role || 'patient',
@@ -491,4 +493,32 @@ export async function getCurrentSession() {
 
   const { data: { session } } = await supabase.auth.getSession()
   return session
+}
+
+// Admin Dashboard Stats
+export async function getAdminStats() {
+  if (!supabase) return null
+
+  const { data, error } = await supabase
+    .from('admin_stats')
+    .select('*')
+    .single()
+
+  if (error) {
+    console.error('Error fetching admin stats:', error)
+    return null
+  }
+
+  return data
+}
+
+// Enhanced admin check that works with actual auth
+export async function isCurrentUserAdmin(): Promise<boolean> {
+  if (!supabase) return false
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const profile = await getUserProfile(user.id)
+  return profile?.role === 'admin'
 }

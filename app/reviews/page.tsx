@@ -22,8 +22,8 @@ export default function ReviewsPage() {
   const [newReview, setNewReview] = useState({
     name: "",
     rating: 5,
-    comment: "",
-    service: "",
+    review_text: "",
+    email: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()

@@ -17,7 +17,7 @@ DELETE FROM reviews
 WHERE 
   LOWER(name) LIKE '%test%'
   OR LOWER(name) LIKE '%demo%'
-  OR LOWER(comment) LIKE '%sample%';
+  OR LOWER(review_text) LIKE '%sample%';
 
 -- Delete diagnostic test logs
 DELETE FROM diagnostic_logs 

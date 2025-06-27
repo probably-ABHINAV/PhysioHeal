@@ -17,9 +17,9 @@ import { createClient } from "@/lib/supabase"
 
 const reviewSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  service: z.string().min(1, "Please select a service"),
+  email: z.string().email("Please enter a valid email").optional().or(z.literal("")),
   rating: z.number().min(1, "Please select a rating").max(5),
-  comment: z.string().min(10, "Review must be at least 10 characters"),
+  review_text: z.string().min(10, "Review must be at least 10 characters"),
 })
 
 type ReviewFormData = z.infer<typeof reviewSchema>
@@ -55,12 +55,10 @@ export function ReviewForm() {
 
       const reviewData = {
         name: data.name,
-        service: data.service,
+        email: data.email || null,
         rating: data.rating,
-        comment: data.comment,
-        approved: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        review_text: data.review_text,
+        approved: false
       }
 
       const { data: insertedData, error } = await supabase
@@ -147,22 +145,16 @@ export function ReviewForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="service">Service</Label>
-        <Select onValueChange={(value) => setValue("service", value)}>
-          <SelectTrigger className={errors.service ? "border-red-500" : ""}>
-            <SelectValue placeholder="Select service" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Sports Therapy">Sports Therapy</SelectItem>
-            <SelectItem value="Pain Management">Pain Management</SelectItem>
-            <SelectItem value="Orthopedic Care">Orthopedic Care</SelectItem>
-            <SelectItem value="Rehabilitation">Rehabilitation</SelectItem>
-            <SelectItem value="Cardiac Rehabilitation">Cardiac Rehabilitation</SelectItem>
-            <SelectItem value="Neurological Rehabilitation">Neurological Rehabilitation</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.service && (
-          <p className="text-sm text-red-500">{errors.service.message}</p>
+        <Label htmlFor="email">Email (Optional)</Label>
+        <Input
+          id="email"
+          type="email"
+          {...register("email")}
+          placeholder="Enter your email (optional)"
+          className={errors.email ? "border-red-500" : ""}
+        />
+        {errors.email && (
+          <p className="text-sm text-red-500">{errors.email.message}</p>
         )}
       </div>
 
@@ -187,16 +179,16 @@ export function ReviewForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="comment">Your Review</Label>
+        <Label htmlFor="review_text">Your Review</Label>
         <Textarea
-          id="comment"
-          {...register("comment")}
+          id="review_text"
+          {...register("review_text")}
           placeholder="Share your experience..."
           rows={4}
-          className={errors.comment ? "border-red-500" : ""}
+          className={errors.review_text ? "border-red-500" : ""}
         />
-        {errors.comment && (
-          <p className="text-sm text-red-500">{errors.comment.message}</p>
+        {errors.review_text && (
+          <p className="text-sm text-red-500">{errors.review_text.message}</p>
         )}
       </div>
 

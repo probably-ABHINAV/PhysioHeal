@@ -1,15 +1,32 @@
--- Create reviews table for storing patient reviews
+
+-- Create reviews table with all necessary columns
 CREATE TABLE IF NOT EXISTS reviews (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name VARCHAR(255),
-    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    comment TEXT NOT NULL,
-    service VARCHAR(255),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  review_text TEXT NOT NULL,
+  approved BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Create an index on created_at for better query performance
-CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at DESC);
+-- Enable Row Level Security
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 
--- Sample reviews removed for production use
+-- Create policy for public read access to approved reviews
+CREATE POLICY "Public can view approved reviews" ON reviews
+  FOR SELECT USING (approved = true);
+
+-- Create policy for inserting new reviews (pending approval)
+CREATE POLICY "Anyone can insert reviews" ON reviews
+  FOR INSERT WITH CHECK (true);
+
+-- Create policy for admin access (update/delete)
+CREATE POLICY "Admin can manage all reviews" ON reviews
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Grant necessary permissions
+GRANT SELECT ON reviews TO anon, authenticated;
+GRANT INSERT ON reviews TO anon, authenticated;
+GRANT ALL ON reviews TO service_role;
