@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 // Force dynamic rendering to prevent prerendering errors
@@ -22,11 +22,17 @@ export default function LoginPage() {
     email: "",
     password: ""
   })
+  const [isClient, setIsClient] = useState(false)
 
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/'
   const { toast } = useToast()
+
+  // Ensure this only runs on client side
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -116,6 +122,20 @@ export default function LoginPage() {
       default:
         return 'Sign in to your account'
     }
+  }
+    // Show loading while client initializes to prevent hydration mismatch
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-4">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardContent className="p-8">
+              <div className="text-center">Loading...</div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   return (
