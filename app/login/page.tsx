@@ -1,141 +1,100 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+export const dynamic = 'force-dynamic'; // Ensures no static rendering (avoids build error)
 
-// Force dynamic rendering to prevent prerendering errors
-export const dynamic = 'force-dynamic'
-import { motion } from "framer-motion"
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Shield } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useToast } from "@/hooks/use-toast"
-import { signInWithEmail, signUpWithEmail } from "@/lib/supabase"
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import { signInWithEmail, signUpWithEmail } from "@/lib/supabase";
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true)
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    email: "",
-    password: ""
-  })
-  const [isClient, setIsClient] = useState(false)
+  const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [isClient, setIsClient] = useState(false);
 
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect') || '/'
-  const { toast } = useToast()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
+  const { toast } = useToast();
 
-  // Ensure this only runs on client side
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  // Prevent hydration mismatch
+  useEffect(() => setIsClient(true), []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      // Check for authorized admin email
-      if (formData.email === 'xoxogroovy@gmail.com' && formData.password === 'Cypher123@') {
-        // Store admin session in localStorage (browser only)
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('isLoggedIn', 'true')
-          localStorage.setItem('userEmail', formData.email)
-          localStorage.setItem('userRole', 'admin')
-        }
+      // Allow hardcoded admin login for specific use
+      if (formData.email === "xoxogroovy@gmail.com" && formData.password === "Cypher123@") {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", formData.email);
+        localStorage.setItem("userRole", "admin");
 
-        toast({
-          title: "Login Successful",
-          description: "Welcome back, Admin!",
-        })
-
-        // Redirect to requested page or home
-        router.push(redirectTo)
-        return
+        toast({ title: "Login Successful", description: "Welcome back, Admin!" });
+        router.push(redirectTo);
+        return;
       }
 
-      // Try Supabase authentication
-      let result
+      let result;
       if (isLogin) {
-        result = await signInWithEmail(formData.email, formData.password)
+        result = await signInWithEmail(formData.email, formData.password);
       } else {
-        result = await signUpWithEmail(formData.email, formData.password, {
-          role: 'patient'
-        })
+        result = await signUpWithEmail(formData.email, formData.password, { role: "patient" });
       }
 
       if (result.error) {
-        toast({
-          title: "Authentication Error",
-          description: result.error.message,
-          variant: "destructive",
-        })
-        return
+        toast({ title: "Authentication Error", description: result.error.message, variant: "destructive" });
+        return;
       }
 
-      if (result.data.user) {
+      if (result.data?.user) {
         toast({
           title: isLogin ? "Login Successful" : "Account Created",
-          description: isLogin ? "Welcome back!" : "Please check your email to verify your account.",
-        })
+          description: isLogin ? "Welcome back!" : "Check your email to verify your account.",
+        });
 
-        if (isLogin) {
-          router.push(redirectTo)
-        }
+        if (isLogin) router.push(redirectTo);
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      })
+      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const getPageTitle = () => {
-    switch (redirectTo) {
-      case '/admin':
-        return 'Admin Login'
-      case '/setup-database':
-        return 'Database Setup Login'
-      case '/diagnostics':
-        return 'Diagnostics Login'
-      default:
-        return 'Login'
-    }
-  }
+    if (redirectTo.includes("admin")) return "Admin Login";
+    if (redirectTo.includes("diagnostics")) return "Diagnostics Login";
+    if (redirectTo.includes("setup")) return "Setup Login";
+    return "Login";
+  };
 
   const getPageDescription = () => {
-    switch (redirectTo) {
-      case '/admin':
-        return 'Access the admin dashboard to manage appointments and messages'
-      case '/setup-database':
-        return 'Configure and initialize the Supabase database'
-      case '/diagnostics':
-        return 'Run system diagnostics and monitor application health'
-      default:
-        return 'Sign in to your account'
-    }
-  }
-    // Show loading while client initializes to prevent hydration mismatch
+    if (redirectTo.includes("admin")) return "Access the admin dashboard to manage the clinic.";
+    if (redirectTo.includes("diagnostics")) return "Run system health checks and diagnostics.";
+    if (redirectTo.includes("setup")) return "Initialize and set up your Supabase database.";
+    return "Sign in to your account.";
+  };
+
   if (!isClient) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-4">
         <div className="w-full max-w-md">
           <Card>
-            <CardContent className="p-8">
-              <div className="text-center">Loading...</div>
-            </CardContent>
+            <CardContent className="p-8 text-center">Loading...</CardContent>
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -146,81 +105,68 @@ export default function LoginPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Card className="shadow-xl border-0 backdrop-blur-sm bg-white/95">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
+        <Card className="shadow-xl border-0 backdrop-blur-sm bg-white/90">
+          <CardHeader className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
               <Shield className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold">PhysioHeal</span>
             </div>
-            <CardTitle className="text-2xl font-bold">{getPageTitle()}</CardTitle>
+            <CardTitle className="text-xl font-semibold">{getPageTitle()}</CardTitle>
             <CardDescription>{getPageDescription()}</CardDescription>
           </CardHeader>
+
           <CardContent>
-            {redirectTo !== '/' && (
+            {redirectTo !== "/" && (
               <Alert className="mb-6 border-blue-200 bg-blue-50">
                 <Shield className="h-4 w-4" />
-                <AlertDescription>
-                  This page requires admin authentication.
-                </AlertDescription>
+                <AlertDescription>This page requires admin authentication.</AlertDescription>
               </Alert>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder="Email address"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="pl-10"
-                    required
-                  />
-                </div>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="pl-10"
+                  required
+                />
               </div>
 
-              <div className="space-y-2">
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="pl-10 pr-10"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </Button>
-                </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="pl-10 pr-10"
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
+              <Button disabled={isLoading} type="submit" className="w-full">
                 {isLoading ? (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>{isLogin ? 'Signing in...' : 'Creating account...'}</span>
+                    <span>{isLogin ? "Signing in..." : "Creating account..."}</span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2">
-                    <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
-                    <ArrowRight className="w-4 h-4" />
+                  <div className="flex items-center gap-2">
+                    <span>{isLogin ? "Sign In" : "Create Account"}</span>
+                    <ArrowRight className="h-4 w-4" />
                   </div>
                 )}
               </Button>
@@ -229,19 +175,15 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <Button
                 variant="ghost"
-                onClick={() => setIsLogin(!isLogin)}
                 className="text-sm"
+                onClick={() => setIsLogin(!isLogin)}
               >
                 {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
               </Button>
             </div>
 
             <div className="mt-4 text-center">
-              <Button
-                variant="outline"
-                onClick={() => router.push('/')}
-                className="text-sm"
-              >
+              <Button variant="outline" className="text-sm" onClick={() => router.push("/")}>
                 Back to Home
               </Button>
             </div>
@@ -249,5 +191,5 @@ export default function LoginPage() {
         </Card>
       </motion.div>
     </div>
-  )
+  );
 }
