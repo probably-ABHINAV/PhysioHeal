@@ -48,7 +48,7 @@ export function ConsultationForm() {
         phone: data.phone,
         email: data.email || null,
         reason: data.reason,
-        preferred_time: data.preferred_time,
+        preferred_time: new Date(data.preferred_time).toISOString(),
         status: 'pending',
       })
 

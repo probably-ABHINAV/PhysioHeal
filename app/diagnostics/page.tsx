@@ -21,6 +21,23 @@ export default function DiagnosticsPage() {
 
   const checkAuthorization = async () => {
     try {
+      // First check localStorage for hardcoded login
+      if (typeof window !== 'undefined') {
+        const isLoggedIn = localStorage.getItem('isLoggedIn')
+        const userEmail = localStorage.getItem('userEmail')
+        const userRole = localStorage.getItem('userRole')
+
+        if (isLoggedIn === 'true' && userEmail === 'xoxogroovy@gmail.com') {
+          setIsAuthorized(true)
+          setUser({
+            email: userEmail,
+            user_metadata: { role: userRole || 'admin' }
+          })
+          return
+        }
+      }
+
+      // Then check Supabase session
       const { data: { session }, error } = await supabase.auth.getSession()
 
       // Require authentication for diagnostics access

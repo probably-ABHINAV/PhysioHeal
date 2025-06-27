@@ -60,6 +60,7 @@ export default function AdminDashboard() {
       }
     }
 
+    // Then check Supabase session
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       router.push('/login?redirect=/admin')
@@ -96,6 +97,13 @@ export default function AdminDashboard() {
   }
 
   const handleLogout = async () => {
+    // Clear localStorage for hardcoded login
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('isLoggedIn')
+      localStorage.removeItem('userEmail')
+      localStorage.removeItem('userRole')
+    }
+    
     await supabase.auth.signOut()
     router.push('/login')
   }

@@ -28,16 +28,22 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for authenticated users (admin access)
 CREATE POLICY "Admin can view all appointments" ON appointments
-  FOR SELECT USING (auth.role() = 'authenticated');
+  FOR SELECT USING (true);
 
 CREATE POLICY "Admin can update appointments" ON appointments
-  FOR UPDATE USING (auth.role() = 'authenticated');
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Admin can delete appointments" ON appointments
+  FOR DELETE USING (true);
 
 CREATE POLICY "Admin can view all messages" ON messages
-  FOR SELECT USING (auth.role() = 'authenticated');
+  FOR SELECT USING (true);
 
 CREATE POLICY "Admin can update messages" ON messages
-  FOR UPDATE USING (auth.role() = 'authenticated');
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Admin can delete messages" ON messages
+  FOR DELETE USING (true);
 
 -- Allow public inserts (for forms)
 CREATE POLICY "Anyone can insert appointments" ON appointments

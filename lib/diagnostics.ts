@@ -139,9 +139,9 @@ export class DiagnosticsRunner {
           duration: Date.now() - startTime,
           timestamp: new Date(),
           suggestions: [
-            'Add NEXT_PUBLIC_SUPABASE_URL to Replit Secrets',
-            'Add NEXT_PUBLIC_SUPABASE_ANON_KEY to Replit Secrets',
-            'Visit the Secrets tab to configure environment variables'
+            'Add NEXT_PUBLIC_SUPABASE_URL to environment variables',
+            'Add NEXT_PUBLIC_SUPABASE_ANON_KEY to environment variables',
+            'Configure environment variables in your deployment settings'
           ]
         }
       }

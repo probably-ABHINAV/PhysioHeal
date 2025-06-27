@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
+import { createClient } from "@/lib/supabase"
 
 const timeSlots = [
   "09:00 AM",
@@ -58,16 +59,32 @@ export default function BookAppointmentPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      // Format the datetime properly
+      const preferredDateTime = new Date(`${formData.date}T${formData.time}`).toISOString()
 
-    // Create WhatsApp message
-    if (formData.whatsappConfirmation) {
+      // Insert appointment into Supabase
+      const { error } = await supabase.from('appointments').insert({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email || null,
+        reason: formData.concern,
+        preferred_time: preferredDateTime,
+        status: 'pending',
+      })
+
+      if (error) {
+        throw error
+      }
+
+      // Create WhatsApp message
+      if (formData.whatsappConfirmation) {
       const message = `Hi! I'd like to book an appointment:
       
 Name: ${formData.name}
@@ -89,11 +106,19 @@ Please confirm my appointment. Thank you!`
     }
 
     toast({
-      title: "Appointment Request Sent!",
-      description: "We'll contact you shortly to confirm your appointment.",
-    })
-
-    setIsSubmitting(false)
+        title: "Appointment Request Sent!",
+        description: "We'll contact you shortly to confirm your appointment.",
+      })
+    } catch (error) {
+      console.error('Error booking appointment:', error)
+      toast({
+        title: "Booking Failed",
+        description: "There was an error booking your appointment. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
 
     // Reset form
     setFormData({

@@ -125,7 +125,7 @@ export function SupabaseDiagnostics() {
       case 'setup_env':
         toast({
           title: "Environment Setup",
-          description: "Please check your Replit Secrets for missing environment variables",
+          description: "Please check your environment variables configuration",
         })
         break
       default:

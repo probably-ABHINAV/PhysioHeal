@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 // Force dynamic rendering to prevent prerendering errors
 export const dynamic = 'force-dynamic'
-import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
