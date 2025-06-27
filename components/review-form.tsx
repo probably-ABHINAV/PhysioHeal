@@ -19,7 +19,8 @@ const reviewSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email").optional().or(z.literal("")),
   rating: z.number().min(1, "Please select a rating").max(5),
-  review_text: z.string().min(10, "Review must be at least 10 characters"),
+  comment: z.string().min(10, "Review must be at least 10 characters"),
+  service: z.string().optional(),
 })
 
 type ReviewFormData = z.infer<typeof reviewSchema>
@@ -57,7 +58,7 @@ export function ReviewForm() {
         name: data.name,
         email: data.email || null,
         rating: data.rating,
-        review_text: data.review_text,
+        comment: data.comment,
         approved: false
       }
 
@@ -179,16 +180,32 @@ export function ReviewForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="review_text">Your Review</Label>
+        <Label htmlFor="service">Service (Optional)</Label>
+        <Select onValueChange={(value) => setValue("service", value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a service" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="physiotherapy">Physiotherapy</SelectItem>
+            <SelectItem value="sports-injury">Sports Injury Recovery</SelectItem>
+            <SelectItem value="pain-management">Pain Management</SelectItem>
+            <SelectItem value="orthopedic">Orthopedic Care</SelectItem>
+            <SelectItem value="rehabilitation">Rehabilitation Therapy</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="comment">Your Review</Label>
         <Textarea
-          id="review_text"
-          {...register("review_text")}
+          id="comment"
+          {...register("comment")}
           placeholder="Share your experience..."
           rows={4}
-          className={errors.review_text ? "border-red-500" : ""}
+          className={errors.comment ? "border-red-500" : ""}
         />
-        {errors.review_text && (
-          <p className="text-sm text-red-500">{errors.review_text.message}</p>
+        {errors.comment && (
+          <p className="text-sm text-red-500">{errors.comment.message}</p>
         )}
       </div>
 

@@ -33,6 +33,7 @@ import { FollowUpTracker } from "./follow-up-tracker"
 import { TimelineChart } from "./timeline-chart"
 import { FilterPanel } from "./filter-panel"
 import { WhatsAppCTA } from "./whatsapp-cta"
+import { ReviewsManagement } from "./reviews-management"
 import { useAdminData } from "@/lib/use-admin-data"
 import { useRealtime } from "@/lib/use-realtime"
 
@@ -242,7 +243,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
 
       {/* Main Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
@@ -262,6 +263,10 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
           <TabsTrigger value="timeline" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
             <span className="hidden sm:inline">Timeline</span>
+          </TabsTrigger>
+          <TabsTrigger value="reviews" className="flex items-center gap-2">
+            <MessageCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">Reviews</span>
           </TabsTrigger>
         </TabsList>
 
@@ -409,6 +414,10 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
 
         <TabsContent value="timeline" className="space-y-4">
           <TimelineChart data={dashboardData.timelineData} />
+        </TabsContent>
+
+        <TabsContent value="reviews" className="space-y-4">
+          <ReviewsManagement onUpdate={refetch} />
         </TabsContent>
       </Tabs>
     </div>

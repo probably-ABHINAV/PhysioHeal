@@ -83,7 +83,8 @@ export type Database = {
           name: string
           email: string | null
           rating: number
-          review_text: string
+          comment: string
+          service: string | null
           approved: boolean
           created_at: string
           updated_at: string
@@ -93,7 +94,8 @@ export type Database = {
           name: string
           email?: string | null
           rating: number
-          review_text: string
+          comment: string
+          service?: string | null
           approved?: boolean
           created_at?: string
           updated_at?: string
@@ -103,7 +105,8 @@ export type Database = {
           name?: string
           email?: string | null
           rating?: number
-          review_text?: string
+          comment?: string
+          service?: string | null
           approved?: boolean
           created_at?: string
           updated_at?: string
@@ -285,7 +288,8 @@ export interface Review {
   id: string
   name: string | null
   rating: number
-  review_text: string
+  comment: string
+  service: string | null
   email: string | null
   created_at: string
   updated_at: string
@@ -299,7 +303,8 @@ export async function getReviews(approved: boolean = true): Promise<Review[]> {
         id: "demo",
         name: "Demo Patient",
         rating: 5,
-        review_text: "Supabase isn't configured yet. Showing demo review.",
+        comment: "Supabase isn't configured yet. Showing demo review.",
+        service: "General Consultation",
         email: "demo@example.com",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

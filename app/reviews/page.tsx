@@ -24,6 +24,7 @@ export default function ReviewsPage() {
     rating: 5,
     review_text: "",
     email: "",
+    service: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -57,7 +58,7 @@ export default function ReviewsPage() {
     const reviewData = {
       name: newReview.name || "Anonymous",
       rating: newReview.rating,
-      comment: newReview.comment,
+      comment: newReview.review_text,
       service: newReview.service || null,
     }
 
@@ -65,7 +66,7 @@ export default function ReviewsPage() {
 
     if (addedReview) {
       setReviews([addedReview, ...reviews])
-      setNewReview({ name: "", rating: 5, comment: "", service: "" })
+      setNewReview({ name: "", rating: 5, review_text: "", service: "" })
       setShowForm(false)
 
       toast({

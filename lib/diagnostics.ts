@@ -916,3 +916,29 @@ export class DiagnosticsRunner {
 }
 
 export const diagnosticsRunner = new DiagnosticsRunner()
+
+// Export convenience function for running diagnostics
+export async function runDiagnostics() {
+  const results = await diagnosticsRunner.runAllTests()
+  
+  const overallStatus = results.some(r => r.status === 'fail') ? 'error' : 
+                       results.some(r => r.status === 'warning') ? 'warning' : 'success'
+  
+  return {
+    overallStatus,
+    results: results.map(r => ({
+      name: r.name,
+      status: r.status === 'pass' ? 'success' : r.status,
+      message: r.message,
+      details: r.details,
+      timestamp: r.timestamp,
+      count: r.details?.totalCount || r.details?.recentCount
+    })),
+    envReady: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    hasSession: false, // Will be updated by actual session check
+    appointmentCount: 0, // Will be updated by actual data
+    messageCount: 0 // Will be updated by actual data
+  }
+}
+
+export type DiagnosticReport = Awaited<ReturnType<typeof runDiagnostics>>

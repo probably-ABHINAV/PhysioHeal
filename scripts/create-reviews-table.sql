@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS reviews (
   name TEXT NOT NULL,
   email TEXT,
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-  review_text TEXT NOT NULL,
+  comment TEXT NOT NULL,
+  service TEXT,
   approved BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

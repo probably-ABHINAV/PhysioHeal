@@ -4,7 +4,7 @@ import React from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts'
-import { TrendingUp, BarChart3 } from "lucide-react"
+import { TrendingUp, BarChart3, CalendarDays } from "lucide-react"
 
 interface AppointmentsGraphProps {
   data?: any[]
