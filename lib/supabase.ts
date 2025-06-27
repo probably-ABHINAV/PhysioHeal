@@ -1,4 +1,3 @@
-
 import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -182,7 +181,7 @@ export async function getAppointments(userId?: string): Promise<Database['public
   if (!supabase) return []
 
   let query = supabase.from('appointments').select('*').order('created_at', { ascending: false })
-  
+
   if (userId) {
     query = query.eq('user_id', userId)
   }
@@ -234,7 +233,7 @@ export async function getMessages(userId?: string): Promise<Database['public']['
   if (!supabase) return []
 
   let query = supabase.from('messages').select('*').order('created_at', { ascending: false })
-  
+
   if (userId) {
     query = query.eq('user_id', userId)
   }
@@ -453,7 +452,7 @@ export async function getDiagnosticLogs(limit: number = 50): Promise<Database['p
 // Authentication helpers
 export async function signInWithEmail(email: string, password: string) {
   if (!supabase) throw new Error('Supabase not configured')
-  
+
   return await supabase.auth.signInWithPassword({ email, password })
 }
 
@@ -464,7 +463,7 @@ export function isAuthorizedAdmin(email?: string): boolean {
 
 export async function signUpWithEmail(email: string, password: string, metadata?: any) {
   if (!supabase) throw new Error('Supabase not configured')
-  
+
   return await supabase.auth.signUp({
     email,
     password,
@@ -476,20 +475,20 @@ export async function signUpWithEmail(email: string, password: string, metadata?
 
 export async function signOut() {
   if (!supabase) return
-  
+
   return await supabase.auth.signOut()
 }
 
 export async function getCurrentUser() {
   if (!supabase) return null
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   return user
 }
 
 export async function getCurrentSession() {
   if (!supabase) return null
-  
+
   const { data: { session } } = await supabase.auth.getSession()
   return session
 }

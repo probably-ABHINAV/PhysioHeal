@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -40,7 +39,7 @@ export function GetInTouchForm() {
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true)
-    
+
     try {
       const { error } = await supabase.from('messages').insert({
         name: data.name,
@@ -56,7 +55,7 @@ export function GetInTouchForm() {
 
       setIsSuccess(true)
       reset()
-      
+
       toast({
         title: "Message Sent Successfully!",
         description: "Thank you for reaching out. We'll get back to you soon.",

@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { getReviews, addReview, type Review } from "@/lib/supabase"
+import { ReviewForm } from "@/components/review-form"
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([])
@@ -31,9 +32,20 @@ export default function ReviewsPage() {
   useEffect(() => {
     async function loadReviews() {
       setLoading(true)
-      const reviewsData = await getReviews()
-      setReviews(reviewsData)
-      setLoading(false)
+      try {
+        const reviewsData = await getReviews()
+        setReviews(reviewsData || [])
+      } catch (error) {
+        console.error('Error loading reviews:', error)
+        setReviews([])
+        toast({
+          title: "Loading Error",
+          description: "Could not load reviews. Please refresh the page.",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
     }
     loadReviews()
   }, [])
@@ -127,77 +139,7 @@ export default function ReviewsPage() {
                 <CardDescription>Help others by sharing your experience with our services</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmitReview} className="space-y-4">
-                  <div>
-                    <Label htmlFor="reviewName">Name (Optional)</Label>
-                    <Input
-                      id="reviewName"
-                      value={newReview.name}
-                      onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                      placeholder="Your name"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="reviewService">Service Received (Optional)</Label>
-                    <Input
-                      id="reviewService"
-                      value={newReview.service}
-                      onChange={(e) => setNewReview({ ...newReview, service: e.target.value })}
-                      placeholder="e.g., Pain Management, Sports Injury Recovery"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Rating</Label>
-                    <div className="flex items-center space-x-1 mt-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setNewReview({ ...newReview, rating: star })}
-                          className="focus:outline-none"
-                        >
-                          <Star
-                            className={`w-8 h-8 ${
-                              star <= newReview.rating
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-300 hover:text-yellow-400"
-                            } transition-colors`}
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="reviewComment">Your Review *</Label>
-                    <Textarea
-                      id="reviewComment"
-                      value={newReview.comment}
-                      onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                      placeholder="Share your experience..."
-                      rows={4}
-                      required
-                    />
-                  </div>
-
-                  <div className="flex space-x-4">
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                          Submitting...
-                        </>
-                      ) : (
-                        "Submit Review"
-                      )}
-                    </Button>
-                    <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
+                <ReviewForm />
               </CardContent>
             </Card>
           </div>

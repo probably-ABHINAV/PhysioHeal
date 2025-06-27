@@ -50,7 +50,7 @@ export default function AdminDashboard() {
     if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn')
       const userEmail = localStorage.getItem('userEmail')
-      
+
       if (isLoggedIn === 'true' && userEmail === 'xoxogroovy@gmail.com') {
         setUser({
           email: userEmail,
@@ -70,22 +70,59 @@ export default function AdminDashboard() {
   }
 
   const fetchData = async () => {
-    setIsLoading(true)
     try {
-      const [appointmentsRes, messagesRes] = await Promise.all([
-        supabase
-          .from('appointments')
-          .select('*')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('messages')
-          .select('*')
-          .order('created_at', { ascending: false })
+      console.log('Fetching admin data...')
+
+      // First check if we can connect to Supabase
+      const { data: testData, error: testError } = await supabase
+        .from('appointments')
+        .select('count')
+        .limit(1)
+
+      if (testError) {
+        console.error('Supabase connection test failed:', testError)
+        toast({
+          title: "Database Connection Error",
+          description: `Failed to connect to database: ${testError.message}`,
+          variant: "destructive",
+        })
+        setIsLoading(false)
+        return
+      }
+
+      const [appointmentsResponse, messagesResponse] = await Promise.all([
+        supabase.from('appointments').select('*').order('created_at', { ascending: false }),
+        supabase.from('messages').select('*').order('created_at', { ascending: false })
       ])
 
-      if (appointmentsRes.data) setAppointments(appointmentsRes.data)
-      if (messagesRes.data) setMessages(messagesRes.data)
+      console.log('Appointments response:', appointmentsResponse)
+      console.log('Messages response:', messagesResponse)
+
+      if (appointmentsResponse.error) {
+        console.error('Error fetching appointments:', appointmentsResponse.error)
+        toast({
+          title: "Appointments Error",
+          description: `Failed to fetch appointments: ${appointmentsResponse.error.message}`,
+          variant: "destructive",
+        })
+      } else {
+        console.log('Fetched appointments:', appointmentsResponse.data?.length || 0)
+        setAppointments(appointmentsResponse.data || [])
+      }
+
+      if (messagesResponse.error) {
+        console.error('Error fetching messages:', messagesResponse.error)
+        toast({
+          title: "Messages Error", 
+          description: `Failed to fetch messages: ${messagesResponse.error.message}`,
+          variant: "destructive",
+        })
+      } else {
+        console.log('Fetched messages:', messagesResponse.data?.length || 0)
+        setMessages(messagesResponse.data || [])
+      }
     } catch (error) {
+      console.error('Error fetching data:', error)
       toast({
         title: "Error",
         description: "Failed to fetch data",
@@ -103,7 +140,7 @@ export default function AdminDashboard() {
       localStorage.removeItem('userEmail')
       localStorage.removeItem('userRole')
     }
-    
+
     await supabase.auth.signOut()
     router.push('/login')
   }
@@ -193,6 +230,20 @@ export default function AdminDashboard() {
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
         />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Loading...</h2>
+          <p>Checking authentication...</p>
+          <div className="mt-4 text-sm text-gray-600">
+            <p>Checking localStorage and Supabase session...</p>
+          </div>
+        </div>
       </div>
     )
   }
