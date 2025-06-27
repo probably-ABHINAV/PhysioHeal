@@ -61,9 +61,4 @@ CREATE TRIGGER trigger_update_diagnostic_logs_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_diagnostic_logs_updated_at();
 
--- Insert a sample diagnostic log entry for testing
-INSERT INTO diagnostic_logs (run_status, test_name, logs) VALUES (
-  'pass',
-  'initial_setup',
-  '{"message": "Diagnostic logs table created successfully", "timestamp": "' || NOW() || '"}'
-);
+-- Sample diagnostic log removed for production use

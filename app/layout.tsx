@@ -1,3 +1,4 @@
+// import { JsonLd } from 'next-seo' // Commented out due to hydration issues
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Inter, Poppins } from "next/font/google"
@@ -6,7 +7,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Navbar } from "@/components/navbar"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
 import { Toaster } from "@/components/ui/toaster"
-import { JsonLd } from "react-schemaorg"
 import { organizationSchema, localBusinessSchema, medicalOrganizationSchema } from "@/lib/schemas"
 
 const inter = Inter({
@@ -148,9 +148,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <JsonLd item={organizationSchema} />
-        <JsonLd item={localBusinessSchema} />
-        <JsonLd item={medicalOrganizationSchema} />
         <link rel="preload" href="/hero-bg.webp" as="image" type="image/webp" />
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />

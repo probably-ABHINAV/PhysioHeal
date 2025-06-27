@@ -23,6 +23,7 @@ export default function DiagnosticsPage() {
     try {
       const { data: { session }, error } = await supabase.auth.getSession()
 
+      // Require authentication for diagnostics access
       if (error || !session) {
         setIsAuthorized(false)
         return
@@ -31,10 +32,8 @@ export default function DiagnosticsPage() {
       const userRole = session.user.user_metadata?.role
       const userEmail = session.user.email
       
-      // Allow access for admin/doctor roles or demo admin email
-      const isAdmin = userRole === 'admin' || 
-                     userRole === 'doctor' || 
-                     userEmail === 'admin@demo.com'
+      // Allow access only for authorized admin email
+      const isAdmin = userEmail === 'xoxogroovy@gmail.com'
 
       // If no role is set but user exists, assign admin role for development
       if (!userRole && session.user) {
@@ -91,7 +90,7 @@ export default function DiagnosticsPage() {
               </p>
               <div className="space-y-2">
                 <Button 
-                  onClick={() => router.push('/login')}
+                  onClick={() => router.push('/login?redirect=/diagnostics')}
                   className="w-full"
                 >
                   Sign In

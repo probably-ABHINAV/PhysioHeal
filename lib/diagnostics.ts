@@ -1,4 +1,3 @@
-
 export interface DiagnosticResult {
   id: string
   name: string
@@ -28,7 +27,7 @@ export class DiagnosticsRunner {
 
   async runAllTests(): Promise<DiagnosticResult[]> {
     this.results = []
-    
+
     const tests = [
       this.testEnvironmentVariables,
       this.testSupabaseConnection,
@@ -46,26 +45,26 @@ export class DiagnosticsRunner {
 
     const promises = tests.map(test => this.runTestWithRetry(test.bind(this)))
     await Promise.all(promises)
-    
+
     // Log results to Supabase
     await this.logDiagnosticRun()
-    
+
     return this.results
   }
 
   private async runTestWithRetry(testFn: () => Promise<DiagnosticResult>, maxRetries = 3): Promise<void> {
     let attempt = 0
-    
+
     while (attempt < maxRetries) {
       try {
         const result = await testFn()
         result.id = `${result.name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`
         this.results.push(result)
-        
+
         if (result.status === 'pass' || result.status === 'warning') {
           break
         }
-        
+
         attempt++
         if (attempt < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
@@ -92,7 +91,7 @@ export class DiagnosticsRunner {
       'NEXT_PUBLIC_SUPABASE_URL',
       'NEXT_PUBLIC_SUPABASE_ANON_KEY'
     ]
-    
+
     const missing = requiredVars.filter(varName => !process.env[varName])
     const duration = Date.now() - startTime
 
@@ -100,14 +99,14 @@ export class DiagnosticsRunner {
       return {
         id: 'env_vars',
         name: 'Environment Variables',
-        status: 'fail',
-        message: `Missing required environment variables: ${missing.join(', ')}`,
+        status: 'warning',
+        message: `Missing environment variables: ${missing.join(', ')} - Running in demo mode`,
         duration,
         timestamp: new Date(),
         suggestions: [
-          'Add missing variables to .env.local file',
-          'Check Replit Secrets for environment variables',
-          'Verify variable names are spelled correctly'
+          'Add NEXT_PUBLIC_SUPABASE_URL to Replit Secrets',
+          'Add NEXT_PUBLIC_SUPABASE_ANON_KEY to Replit Secrets',
+          'Open Secrets tab in left sidebar to configure'
         ],
         autoFixAction: 'setup_env'
       }
@@ -125,13 +124,30 @@ export class DiagnosticsRunner {
 
   private async testSupabaseConnection(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      // Check if environment variables exist
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'supabase_connection',
+          name: 'Supabase Connection',
+          status: 'warning',
+          message: 'Supabase environment variables not configured - using demo mode',
+          duration: Date.now() - startTime,
+          timestamp: new Date(),
+          suggestions: [
+            'Add NEXT_PUBLIC_SUPABASE_URL to Replit Secrets',
+            'Add NEXT_PUBLIC_SUPABASE_ANON_KEY to Replit Secrets',
+            'Visit the Secrets tab to configure environment variables'
+          ]
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const { data, error } = await supabase
         .from('appointments')
@@ -179,13 +195,24 @@ export class DiagnosticsRunner {
 
   private async testAuthStatus(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'auth_status',
+          name: 'Authentication Status',
+          status: 'warning',
+          message: 'Cannot test auth - Supabase not configured',
+          duration: Date.now() - startTime,
+          timestamp: new Date()
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const { data: { session }, error } = await supabase.auth.getSession()
       const duration = Date.now() - startTime
@@ -230,13 +257,24 @@ export class DiagnosticsRunner {
 
   private async testSchemaIntegrity(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'schema_integrity',
+          name: 'Schema Integrity',
+          status: 'warning',
+          message: 'Cannot test schema - Supabase not configured',
+          duration: Date.now() - startTime,
+          timestamp: new Date()
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const requiredTables = ['appointments', 'messages', 'reviews']
       const results = []
@@ -245,7 +283,7 @@ export class DiagnosticsRunner {
         const { error } = await supabase
           .from(table)
           .select('*', { head: true, count: 'exact' })
-        
+
         results.push({ table, exists: !error, error })
       }
 
@@ -292,13 +330,24 @@ export class DiagnosticsRunner {
 
   private async testWritePermissions(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'write_permissions',
+          name: 'Write Permissions',
+          status: 'warning',
+          message: 'Cannot test write permissions - Supabase not configured',
+          duration: Date.now() - startTime,
+          timestamp: new Date()
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const testData = {
         name: 'Diagnostic Test',
@@ -362,13 +411,25 @@ export class DiagnosticsRunner {
 
   private async testAppointmentsTable(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'appointments_table',
+          name: 'Appointments Table',
+          status: 'warning',
+          message: 'Cannot test table - Supabase not configured',
+          duration: Date.now() - startTime,
+          timestamp: new Date(),
+          suggestions: ['Configure Supabase credentials in Replit Secrets']
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const { data, error, count } = await supabase
         .from('appointments')
@@ -427,13 +488,25 @@ export class DiagnosticsRunner {
 
   private async testMessagesTable(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'messages_table',
+          name: 'Messages Table',
+          status: 'warning',
+          message: 'Cannot test table - Supabase not configured',
+          duration: Date.now() - startTime,
+          timestamp: new Date(),
+          suggestions: ['Configure Supabase credentials in Replit Secrets']
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const { data, error, count } = await supabase
         .from('messages')
@@ -477,13 +550,24 @@ export class DiagnosticsRunner {
 
   private async testRealtimeConnection(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'realtime_connection',
+          name: 'Realtime Connection',
+          status: 'warning',
+          message: 'Cannot test realtime - Supabase not configured',
+          duration: Date.now() - startTime,
+          timestamp: new Date()
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const channel = supabase.channel('diagnostic-test')
       const duration = Date.now() - startTime
@@ -531,7 +615,7 @@ export class DiagnosticsRunner {
 
   private async testFormSubmission(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     // This would typically test actual form endpoints
     // For now, we'll simulate a form validation test
     return {
@@ -547,13 +631,24 @@ export class DiagnosticsRunner {
 
   private async testAuthRoles(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'auth_roles',
+          name: 'Auth Roles',
+          status: 'warning',
+          message: 'Cannot test auth roles - Supabase not configured',
+          duration: Date.now() - startTime,
+          timestamp: new Date()
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const { data: { session } } = await supabase.auth.getSession()
       const duration = Date.now() - startTime
@@ -569,25 +664,24 @@ export class DiagnosticsRunner {
         }
       }
 
-      const userRole = session.user.user_metadata?.role
-      const validRoles = ['admin', 'doctor']
-      const hasValidRole = validRoles.includes(userRole)
+      const userEmail = session.user.email
+      const hasValidRole = userEmail === 'xoxogroovy@gmail.com'
 
       return {
         id: 'auth_roles',
         name: 'Auth Roles',
         status: hasValidRole ? 'pass' : 'warning',
         message: hasValidRole 
-          ? `Valid role: ${userRole}`
-          : `Invalid or missing role: ${userRole}`,
+          ? `Authorized admin: ${userEmail}`
+          : `Unauthorized user: ${userEmail}`,
         duration,
         timestamp: new Date(),
         suggestions: !hasValidRole ? [
-          'Update user metadata with valid role',
-          'Check Supabase Auth configuration',
-          'Verify role assignment process'
+          'Contact system administrator for access',
+          'Ensure you are logged in with authorized email',
+          'Check with xoxogroovy@gmail.com for permissions'
         ] : [],
-        details: { userRole, validRoles }
+        details: { userEmail, authorizedEmail: 'xoxogroovy@gmail.com' }
       }
     } catch (error) {
       return {
@@ -603,13 +697,24 @@ export class DiagnosticsRunner {
 
   private async testDatabasePerformance(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'database_performance',
+          name: 'Database Performance',
+          status: 'warning',
+          message: 'Cannot test performance - Supabase not configured',
+          duration: Date.now() - startTime,
+          timestamp: new Date()
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const queries = [
         supabase.from('appointments').select('id').limit(10),
@@ -651,13 +756,24 @@ export class DiagnosticsRunner {
 
   private async testConsultationValidator(): Promise<DiagnosticResult> {
     const startTime = Date.now()
-    
+
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          id: 'consultation_validator',
+          name: 'Consultation Validator',
+          status: 'warning',
+          message: 'Cannot validate consultations - Supabase not configured',
+          duration: Date.now() - startTime,
+          timestamp: new Date()
+        }
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       // Check for appointments with missing required fields
       const { data: incompleteAppointments } = await supabase
@@ -711,11 +827,16 @@ export class DiagnosticsRunner {
 
   private async logDiagnosticRun(): Promise<void> {
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        console.log('Diagnostic run complete - logging skipped (no Supabase config)')
+        return
+      }
+
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       const overallStatus = this.results.some(r => r.status === 'fail') ? 'fail' : 
                            this.results.some(r => r.status === 'warning') ? 'warning' : 'pass'
@@ -741,23 +862,54 @@ export class DiagnosticsRunner {
     }
   }
 
+  async logResult(result: DiagnosticResult): Promise<void> {
+    try {
+      const { logDiagnostic, getCurrentUser } = await import('./supabase')
+      const user = await getCurrentUser()
+
+      await logDiagnostic({
+        test_name: result.name,
+        run_status: result.status,
+        logs: {
+          id: result.id,
+          message: result.message,
+          duration: result.duration,
+          suggestions: result.suggestions,
+          details: result.details,
+          timestamp: result.timestamp,
+          summary: {
+            total: 1,
+            passed: result.status === 'pass' ? 1 : 0,
+            failed: result.status === 'fail' ? 1 : 0,
+            warnings: result.status === 'warning' ? 1 : 0
+          }
+        },
+        user_id: user?.id
+      })
+    } catch (error) {
+      console.error('Failed to log diagnostic result:', error)
+    }
+  }
+
   async getHistoricalData(days: number = 7): Promise<any[]> {
     try {
-      const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const { getDiagnosticLogs } = await import('./supabase')
+      const logs = await getDiagnosticLogs(100) // Get last 100 logs
 
-      const { data } = await supabase
-        .from('diagnostic_logs')
-        .select('*')
-        .gte('timestamp', new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString())
-        .order('timestamp', { ascending: true })
+      // Filter by days and format for display
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - days)
 
-      return data || []
+      return logs
+        .filter(log => new Date(log.timestamp) >= cutoffDate)
+        .map(log => ({
+          test_name: log.test_name,
+          run_status: log.run_status,
+          timestamp: log.timestamp,
+          logs: log.logs
+        }))
     } catch (error) {
-      console.error('Failed to fetch historical data:', error)
+      console.error('Failed to fetch historical diagnostic data:', error)
       return []
     }
   }

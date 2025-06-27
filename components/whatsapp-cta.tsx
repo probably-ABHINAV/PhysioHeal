@@ -1,4 +1,3 @@
-
 "use client"
 
 import React from "react"
@@ -13,11 +12,11 @@ interface WhatsAppCTAProps {
 
 export function WhatsAppCTA({ phone, name, message }: WhatsAppCTAProps) {
   const defaultMessage = `Hi ${name}, this is a reminder about your physiotherapy appointment. Please confirm your availability or let us know if you need to reschedule.`
-  
+
   const whatsappMessage = message || defaultMessage
-  
+
   const cleanPhone = phone.replace(/[^\d+]/g, '')
-  
+
   const handleWhatsAppClick = () => {
     const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMessage)}`
     window.open(url, '_blank', 'noopener,noreferrer')

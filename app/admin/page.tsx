@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useEffect, useState } from "react"
@@ -47,9 +46,23 @@ export default function AdminDashboard() {
   }, [])
 
   const checkUser = async () => {
+    // Check for localStorage admin session first
+    if (typeof window !== 'undefined') {
+      const isLoggedIn = localStorage.getItem('isLoggedIn')
+      const userEmail = localStorage.getItem('userEmail')
+      
+      if (isLoggedIn === 'true' && userEmail === 'xoxogroovy@gmail.com') {
+        setUser({
+          email: userEmail,
+          user_metadata: { role: 'admin' }
+        })
+        return
+      }
+    }
+
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
-      router.push('/login')
+      router.push('/login?redirect=/admin')
       return
     }
     setUser(session.user)

@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { DiagnosticCard } from "./diagnostic-card"
 import { StatusBadge } from "./status-badge"
 import { ReportExporter } from "./report-exporter"
+import { DiagnosticSettings } from "./diagnostic-settings"
 import { diagnosticsRunner, DiagnosticResult } from "@/lib/diagnostics"
 
 export function SupabaseDiagnostics() {
@@ -22,8 +23,13 @@ export function SupabaseDiagnostics() {
   const { toast } = useToast()
 
   useEffect(() => {
-    runDiagnostics()
-    loadHistoricalData()
+    // Only run diagnostics after component mounts to avoid hydration issues
+    const timer = setTimeout(() => {
+      runDiagnostics()
+      loadHistoricalData()
+    }, 100)
+    
+    return () => clearTimeout(timer)
   }, [])
 
   const runDiagnostics = async () => {
@@ -65,9 +71,24 @@ export function SupabaseDiagnostics() {
       }
     } catch (error) {
       console.error('Diagnostics failed:', error)
+      
+      // Create a mock result for display purposes
+      setResults([{
+        id: 'diagnostics_error',
+        name: 'Diagnostics Runner',
+        status: 'fail',
+        message: `Diagnostics failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        timestamp: new Date(),
+        suggestions: [
+          'Check browser console for detailed errors',
+          'Verify environment variables are set',
+          'Try refreshing the page'
+        ]
+      }])
+      
       toast({
         title: "Diagnostics Failed",
-        description: "An error occurred while running diagnostics",
+        description: "Some tests could not run - check results below",
         variant: "destructive"
       })
     } finally {
@@ -370,48 +391,9 @@ export function SupabaseDiagnostics() {
 
         <TabsContent value="settings" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Diagnostic Settings</CardTitle>
-                <CardDescription>
-                  Configure diagnostic behavior and notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Auto-retry failed tests</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Automatically retry failed tests up to 3 times
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">Configure</Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Email notifications</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Send email alerts when tests fail
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">Setup</Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Scheduled diagnostics</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Run diagnostics automatically at regular intervals
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">Configure</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
+            <div className="space-y-6">
+              <DiagnosticSettings />
+            </div>
             <ReportExporter results={results} historicalData={historicalData} />
           </div>
         </TabsContent>

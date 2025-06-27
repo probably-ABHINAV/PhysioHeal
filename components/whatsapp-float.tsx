@@ -29,7 +29,7 @@ export function WhatsAppFloat() {
   }, [])
 
   const handleWhatsAppClick = () => {
-    const phoneNumber = "+917979855427"
+    const phoneNumber = "+911234567890"
     const message = encodeURIComponent("Hi! I would like to know more about your physiotherapy services.")
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`
     window.open(whatsappUrl, "_blank", "noopener,noreferrer")

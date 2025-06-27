@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -49,7 +48,25 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
     status: 'all',
     doctor: 'all'
   })
-  
+
+  // Check if user is authorized admin
+  const isAuthorizedAdmin = user?.email === 'xoxogroovy@gmail.com'
+
+  if (!isAuthorizedAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6 text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-red-800 mb-2">Access Denied</h3>
+            <p className="text-red-600 mb-4">You are not authorized to access the admin dashboard.</p>
+            <p className="text-sm text-red-500">Please contact the system administrator.</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   const { toast } = useToast()
   const { data, loading, error, refetch } = useAdminData(filters)
   const { isConnected, lastUpdate } = useRealtime(['appointments', 'messages'], refetch)
@@ -141,7 +158,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
             <span className="text-xs">{isConnected ? 'Live' : 'Offline'}</span>
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -151,7 +168,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
             <Filter className="h-4 w-4" />
             <span>Filters</span>
           </Button>
-          
+
           <Button
             variant="outline"
             onClick={refetch}
@@ -161,7 +178,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </Button>
-          
+
           <Button
             onClick={() => handleExport('csv')}
             className="flex items-center space-x-2"

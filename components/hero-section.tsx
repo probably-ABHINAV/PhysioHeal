@@ -34,10 +34,10 @@ export function HeroSection() {
             >
               <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
                 <Award className="w-4 h-4 mr-2" />
-                5+ Years Experience
+                Professional Care
               </Badge>
               <Badge variant="outline" className="px-3 py-2 text-sm">
-                BPT, MPT Ortho
+                Licensed Physiotherapist
               </Badge>
             </motion.div>
 
@@ -66,7 +66,8 @@ export function HeroSection() {
               journey to recovery starts here.
             </motion.p>
 
-            {/* Rating */}
+            {/* Rating - Hidden until real reviews are collected */}
+            {/* 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -80,6 +81,7 @@ export function HeroSection() {
               </div>
               <span className="text-sm text-muted-foreground">4.9/5 from 200+ patients</span>
             </motion.div>
+            */}
 
             {/* CTA Buttons */}
             <motion.div
@@ -96,7 +98,7 @@ export function HeroSection() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="tel:+919876543210">
+                <Link href="tel:+911234567890">
                   <Phone className="w-5 h-5 mr-2" />
                   Call Now
                 </Link>

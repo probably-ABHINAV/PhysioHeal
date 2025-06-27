@@ -31,7 +31,7 @@ export default function AdminDashboardPage() {
           setIsAuthorized(true)
           setUser({
             email: userEmail,
-            user_metadata: { role: userRole }
+            user_metadata: { role: 'admin' }
           })
           return
         }

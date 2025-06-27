@@ -238,39 +238,28 @@ function generateChartData(appointments: any[]) {
 function getSampleAdminData() {
   return {
     stats: {
-      totalBookings: 1287,
-      activePatients: 42,
-      pendingFollowUps: 6,
-      repeatPatientRate: 52,
-      todayRevenue: 3500,
-      bookingsTrend: 12,
-      patientsTrend: 8,
-      followUpsTrend: -2,
-      repeatTrend: 5,
-      revenueTrend: 15,
-      newPatients: 28,
-      returningPatients: 34,
-      chronicCases: 18
+      totalBookings: 0,
+      activePatients: 0,
+      pendingFollowUps: 0,
+      repeatPatientRate: 0,
+      todayRevenue: 0,
+      bookingsTrend: 0,
+      patientsTrend: 0,
+      followUpsTrend: 0,
+      repeatTrend: 0,
+      revenueTrend: 0,
+      newPatients: 0,
+      returningPatients: 0,
+      chronicCases: 0
     },
-    chartData: [
-      { date: '2024-01-01', appointments: 12, completed: 10, cancelled: 2 },
-      { date: '2024-01-02', appointments: 15, completed: 13, cancelled: 2 },
-      { date: '2024-01-03', appointments: 8, completed: 7, cancelled: 1 },
-      { date: '2024-01-04', appointments: 18, completed: 16, cancelled: 2 },
-      { date: '2024-01-05', appointments: 22, completed: 20, cancelled: 2 },
-      { date: '2024-01-06', appointments: 14, completed: 12, cancelled: 2 },
-      { date: '2024-01-07', appointments: 16, completed: 15, cancelled: 1 }
-    ],
+    chartData: [],
     patients: [],
     appointments: [],
-    nextPatients: [
-      { id: '1', name: 'Riya Sharma', phone: '+919876543210', time: '14:00', reason: 'Back pain therapy' },
-      { id: '2', name: 'Amit Kumar', phone: '+919876543211', time: '15:30', reason: 'Knee rehabilitation' }
-    ],
+    nextPatients: [],
     appointmentStats: {
-      completed: 45,
-      pending: 12,
-      noShows: 3
+      completed: 0,
+      pending: 0,
+      noShows: 0
     },
     followUps: [],
     timelineData: []

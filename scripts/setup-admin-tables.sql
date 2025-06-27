@@ -81,12 +81,7 @@ INSERT INTO appointments (name, phone, email, reason, preferred_time, service, n
 ('Kavita Sharma', '+919876543218', 'kavita.sharma@gmail.com', 'Posture correction', (CURRENT_DATE - INTERVAL '1 day') + TIME '13:00', 'Ergonomic Training', 'Work-related issues', 'completed', 'Dr. Brown', false, CURRENT_DATE + INTERVAL '21 days', ARRAY[]::TEXT[]),
 ('Deepak Mehta', '+919876543219', 'deepak.mehta@gmail.com', 'Spinal therapy', CURRENT_DATE + TIME '17:00', 'Spinal Care', 'Herniated disc treatment', 'pending', 'Dr. Jones', true, NULL, ARRAY['chronic']);
 
--- Insert sample messages data
-INSERT INTO messages (name, email, phone, message, status) VALUES
-('Ravi Patel', 'ravi.patel@gmail.com', '+919876543220', 'Hi, I would like to know about your physiotherapy services for knee pain.', 'pending'),
-('Sonia Singh', 'sonia.singh@gmail.com', '+919876543221', 'Can you please provide information about your treatment costs?', 'read'),
-('Arjun Kumar', 'arjun.kumar@gmail.com', '+919876543222', 'I need help with sports injury recovery. Do you have specialized programs?', 'pending'),
-('Neha Agarwal', 'neha.agarwal@gmail.com', '+919876543223', 'What are your clinic timings? I work late hours.', 'read');
+-- Sample messages removed for production use
 
 -- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
