@@ -1,326 +1,421 @@
+
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { CheckCircle, XCircle, AlertCircle, Database, Key, Globe } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import React, { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { RefreshCw, Download, Share, AlertCircle, TrendingUp, Database, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { supabase } from "@/lib/supabase"
-
-interface DiagnosticResult {
-  name: string
-  status: "success" | "error" | "warning"
-  message: string
-  details?: string
-}
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useToast } from "@/hooks/use-toast"
+import { DiagnosticCard } from "./diagnostic-card"
+import { StatusBadge } from "./status-badge"
+import { ReportExporter } from "./report-exporter"
+import { diagnosticsRunner, DiagnosticResult } from "@/lib/diagnostics"
 
 export function SupabaseDiagnostics() {
-  const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([])
+  const [results, setResults] = useState<DiagnosticResult[]>([])
   const [isRunning, setIsRunning] = useState(false)
-
-  const runDiagnostics = async () => {
-    setIsRunning(true)
-    const results: DiagnosticResult[] = []
-
-    // 1. Check Environment Variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-    results.push({
-      name: "Environment Variables",
-      status: supabaseUrl && supabaseAnonKey ? "success" : "error",
-      message: supabaseUrl && supabaseAnonKey ? "Environment variables are set" : "Missing environment variables",
-      details: `URL: ${supabaseUrl ? "✓ Set" : "✗ Missing"}, Key: ${supabaseAnonKey ? "✓ Set" : "✗ Missing"}`,
-    })
-
-    // 2. Check Supabase Client Creation
-    results.push({
-      name: "Supabase Client",
-      status: supabase ? "success" : "error",
-      message: supabase ? "Supabase client created successfully" : "Failed to create Supabase client",
-      details: supabase ? "Client is ready for use" : "Check your environment variables",
-    })
-
-    // 3. Test Database Connection
-    if (supabase) {
-      try {
-        const { data, error } = await supabase.from("reviews").select("count", { count: "exact", head: true })
-
-        if (error) {
-          if (error.code === "42P01" || error.message.includes("does not exist")) {
-            results.push({
-              name: "Database Table",
-              status: "warning",
-              message: "Reviews table does not exist",
-              details: "Run the SQL script to create the reviews table",
-            })
-          } else {
-            results.push({
-              name: "Database Connection",
-              status: "error",
-              message: "Database connection failed",
-              details: error.message,
-            })
-          }
-        } else {
-          results.push({
-            name: "Database Connection",
-            status: "success",
-            message: "Successfully connected to database",
-            details: `Reviews table exists with ${data?.[0]?.count || 0} records`,
-          })
-        }
-      } catch (err) {
-        results.push({
-          name: "Database Connection",
-          status: "error",
-          message: "Failed to connect to database",
-          details: err instanceof Error ? err.message : "Unknown error",
-        })
-      }
-
-      // 4. Test Insert Permission (RLS Check)
-      try {
-        const testReview = {
-          name: "Test User",
-          rating: 5,
-          comment: "This is a test review to check permissions",
-          service: "Test Service",
-        }
-
-        const { data, error } = await supabase.from("reviews").insert([testReview]).select().single()
-
-        if (error) {
-          // More robust error checking
-          const errorMessage = error.message || String(error)
-          const errorCode = (error as any).code || ""
-
-          if (errorCode === "42501" || errorMessage.toLowerCase().includes("permission")) {
-            results.push({
-              name: "Insert Permissions",
-              status: "warning",
-              message: "RLS (Row Level Security) is blocking inserts",
-              details: "You may need to disable RLS or create policies for the reviews table",
-            })
-          } else if (errorCode === "42P01" || errorMessage.toLowerCase().includes("does not exist")) {
-            results.push({
-              name: "Insert Permissions",
-              status: "warning",
-              message: "Cannot test permissions - table does not exist",
-              details: "Create the reviews table first, then test permissions",
-            })
-          } else {
-            results.push({
-              name: "Insert Permissions",
-              status: "error",
-              message: "Failed to insert test record",
-              details: `Error: ${errorMessage} (Code: ${errorCode})`,
-            })
-          }
-        } else {
-          results.push({
-            name: "Insert Permissions",
-            status: "success",
-            message: "Successfully inserted test record",
-            details: "RLS permissions are correctly configured",
-          })
-
-          // Clean up test record
-          if (data?.id) {
-            await supabase.from("reviews").delete().eq("id", data.id)
-          }
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err)
-        results.push({
-          name: "Insert Permissions",
-          status: "error",
-          message: "Failed to test insert permissions",
-          details: `Unexpected error: ${errorMessage}`,
-        })
-      }
-    }
-
-    setDiagnostics(results)
-    setIsRunning(false)
-  }
+  const [progress, setProgress] = useState(0)
+  const [historicalData, setHistoricalData] = useState<any[]>([])
+  const { toast } = useToast()
 
   useEffect(() => {
     runDiagnostics()
+    loadHistoricalData()
   }, [])
 
-  const getStatusIcon = (status: DiagnosticResult["status"]) => {
-    switch (status) {
-      case "success":
-        return <CheckCircle className="w-5 h-5 text-green-500" />
-      case "error":
-        return <XCircle className="w-5 h-5 text-red-500" />
-      case "warning":
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />
+  const runDiagnostics = async () => {
+    setIsRunning(true)
+    setProgress(0)
+    setResults([])
+
+    try {
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setProgress(prev => Math.min(prev + 10, 90))
+      }, 500)
+
+      const diagnosticResults = await diagnosticsRunner.runAllTests()
+      
+      clearInterval(progressInterval)
+      setProgress(100)
+      setResults(diagnosticResults)
+      
+      const failedTests = diagnosticResults.filter(r => r.status === 'fail').length
+      const warningTests = diagnosticResults.filter(r => r.status === 'warning').length
+      
+      if (failedTests > 0) {
+        toast({
+          title: "Diagnostics Complete",
+          description: `${failedTests} tests failed, ${warningTests} warnings`,
+          variant: "destructive"
+        })
+      } else if (warningTests > 0) {
+        toast({
+          title: "Diagnostics Complete",
+          description: `All tests passed with ${warningTests} warnings`,
+        })
+      } else {
+        toast({
+          title: "Diagnostics Complete",
+          description: "All tests passed successfully! 🎉",
+        })
+      }
+    } catch (error) {
+      console.error('Diagnostics failed:', error)
+      toast({
+        title: "Diagnostics Failed",
+        description: "An error occurred while running diagnostics",
+        variant: "destructive"
+      })
+    } finally {
+      setIsRunning(false)
+      setTimeout(() => setProgress(0), 2000)
     }
   }
 
-  const getStatusBadge = (status: DiagnosticResult["status"]) => {
-    switch (status) {
-      case "success":
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Success</Badge>
-      case "error":
-        return <Badge variant="destructive">Error</Badge>
-      case "warning":
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Warning</Badge>
+  const loadHistoricalData = async () => {
+    try {
+      const data = await diagnosticsRunner.getHistoricalData(7)
+      setHistoricalData(data)
+    } catch (error) {
+      console.error('Failed to load historical data:', error)
     }
   }
+
+  const handleRetry = async (testId: string) => {
+    toast({
+      title: "Retrying Test",
+      description: "Running individual test...",
+    })
+    // In a real implementation, you'd retry the specific test
+    await runDiagnostics()
+  }
+
+  const handleAutoFix = async (action: string) => {
+    toast({
+      title: "Auto Fix",
+      description: `Attempting to fix: ${action}`,
+    })
+    
+    switch (action) {
+      case 'setup_env':
+        toast({
+          title: "Environment Setup",
+          description: "Please check your Replit Secrets for missing environment variables",
+        })
+        break
+      default:
+        toast({
+          title: "Auto Fix",
+          description: "Fix action not implemented yet",
+        })
+    }
+  }
+
+  const exportReport = () => {
+    const report = {
+      timestamp: new Date().toISOString(),
+      summary: {
+        total: results.length,
+        passed: results.filter(r => r.status === 'pass').length,
+        failed: results.filter(r => r.status === 'fail').length,
+        warnings: results.filter(r => r.status === 'warning').length
+      },
+      results: results,
+      historicalData: historicalData.slice(-10) // Last 10 runs
+    }
+
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `diagnostics-report-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast({
+      title: "Report Exported",
+      description: "Diagnostics report downloaded successfully",
+    })
+  }
+
+  const getOverallStatus = () => {
+    if (results.length === 0) return 'unknown'
+    if (results.some(r => r.status === 'fail')) return 'fail'
+    if (results.some(r => r.status === 'warning')) return 'warning'
+    return 'pass'
+  }
+
+  const getStatusCounts = () => {
+    return {
+      total: results.length,
+      passed: results.filter(r => r.status === 'pass').length,
+      failed: results.filter(r => r.status === 'fail').length,
+      warnings: results.filter(r => r.status === 'warning').length
+    }
+  }
+
+  const statusCounts = getStatusCounts()
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center">
-        <h1 className="text-3xl font-heading font-bold mb-4">
-          <Database className="w-8 h-8 inline mr-3 text-primary" />
-          Supabase Diagnostics
-        </h1>
-        <p className="text-muted-foreground mb-6">Check your Supabase configuration and database connectivity</p>
-        <Button onClick={runDiagnostics} disabled={isRunning} className="btn-3d">
-          {isRunning ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-              Running Diagnostics...
-            </>
-          ) : (
-            <>
-              <Database className="w-4 h-4 mr-2" />
-              Run Diagnostics
-            </>
-          )}
-        </Button>
-      </motion.div>
-
-      <div className="grid gap-6">
-        {diagnostics.map((diagnostic, index) => (
-          <motion.div
-            key={diagnostic.name}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
+    <div className="space-y-6">
+      {/* Header with Controls */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">System Diagnostics</h1>
+          <p className="text-muted-foreground">
+            Comprehensive health checks for your physiotherapy platform
+          </p>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Button
+            onClick={runDiagnostics}
+            disabled={isRunning}
+            className="flex items-center space-x-2"
           >
-            <Card className="card-3d">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-semibold flex items-center">
-                  {getStatusIcon(diagnostic.status)}
-                  <span className="ml-3">{diagnostic.name}</span>
-                </CardTitle>
-                {getStatusBadge(diagnostic.status)}
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-2">{diagnostic.message}</p>
-                {diagnostic.details && (
-                  <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">{diagnostic.details}</p>
-                )}
+            <RefreshCw className={`h-4 w-4 ${isRunning ? 'animate-spin' : ''}`} />
+            <span>{isRunning ? 'Running...' : 'Run Diagnostics'}</span>
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={exportReport}
+            disabled={results.length === 0}
+            className="flex items-center space-x-2"
+          >
+            <Download className="h-4 w-4" />
+            <span>Export</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <AnimatePresence>
+        {isRunning && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Running diagnostics...</span>
+                    <span>{progress}%</span>
+                  </div>
+                  <Progress value={progress} className="w-full" />
+                </div>
               </CardContent>
             </Card>
           </motion.div>
-        ))}
-      </div>
+        )}
+      </AnimatePresence>
 
-      {/* Environment Variables Display */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="mt-8"
-      >
-        <Card className="card-3d">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Key className="w-5 h-5 mr-2 text-primary" />
-              Environment Variables Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
-                <span className="font-medium">NEXT_PUBLIC_SUPABASE_URL</span>
-                <div className="flex items-center">
-                  {process.env.NEXT_PUBLIC_SUPABASE_URL ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      <span className="text-sm text-green-600">Set</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="w-4 h-4 text-red-500 mr-2" />
-                      <span className="text-sm text-red-600">Missing</span>
-                    </>
-                  )}
+      {/* Summary Cards */}
+      {results.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2">
+                <Database className="h-8 w-8 text-blue-500" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Tests</p>
+                  <p className="text-2xl font-bold">{statusCounts.total}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
-                <span className="font-medium">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>
-                <div className="flex items-center">
-                  {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                      <span className="text-sm text-green-600">Set</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="w-4 h-4 text-red-500 mr-2" />
-                      <span className="text-sm text-red-600">Missing</span>
-                    </>
-                  )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-8 w-8 text-green-500" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Passed</p>
+                  <p className="text-2xl font-bold text-green-600">{statusCounts.passed}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="h-8 w-8 text-yellow-500" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Warnings</p>
+                  <p className="text-2xl font-bold text-yellow-600">{statusCounts.warnings}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="h-8 w-8 text-red-500" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Failed</p>
+                  <p className="text-2xl font-bold text-red-600">{statusCounts.failed}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <Tabs defaultValue="current" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="current">Current Status</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="settings">Settings & Export</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="current" className="space-y-4">
+          {results.length > 0 && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-lg font-medium">Overall Status:</span>
+                <StatusBadge status={getOverallStatus()} />
+              </div>
+              <span className="text-sm text-muted-foreground">
+                Last run: {new Date().toLocaleString()}
+              </span>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+          )}
 
-      {/* Setup Instructions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-        className="mt-8"
-      >
-        <Card className="card-3d border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center text-primary">
-              <Globe className="w-5 h-5 mr-2" />
-              Setup Instructions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 text-sm">
-              <div>
-                <h4 className="font-semibold mb-2">1. Create .env.local file</h4>
-                <p className="text-muted-foreground mb-2">
-                  Create a file named <code className="bg-muted px-1 rounded">.env.local</code> in your project root
-                  with:
-                </p>
-                <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-                  {`NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here`}
-                </pre>
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {results.map((result, index) => (
+              <DiagnosticCard
+                key={`${result.id}-${index}`}
+                result={result}
+                onRetry={handleRetry}
+                onAutoFix={handleAutoFix}
+              />
+            ))}
+          </div>
 
-              <div>
-                <h4 className="font-semibold mb-2">2. Create Reviews Table</h4>
-                <p className="text-muted-foreground">
-                  Run the SQL script <code className="bg-muted px-1 rounded">scripts/create-reviews-table.sql</code> in
-                  your Supabase SQL editor.
-                </p>
-              </div>
+          {results.length === 0 && !isRunning && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8">
+                  <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No diagnostics data</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Click "Run Diagnostics" to perform system health checks
+                  </p>
+                  <Button onClick={runDiagnostics}>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Run Diagnostics
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
 
-              <div>
-                <h4 className="font-semibold mb-2">3. Configure RLS (Optional)</h4>
-                <p className="text-muted-foreground">
-                  If you want to allow public inserts, disable RLS on the reviews table or create appropriate policies.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+        <TabsContent value="history" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Diagnostics History</CardTitle>
+              <CardDescription>
+                Past diagnostic runs and trends
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {historicalData.length > 0 ? (
+                <div className="space-y-4">
+                  {historicalData.slice(-10).reverse().map((log, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <StatusBadge status={log.run_status} />
+                        <div>
+                          <p className="font-medium">{log.test_name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(log.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm">
+                          {log.logs?.summary?.total || 0} tests
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {log.logs?.summary?.failed || 0} failed
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No history available</h3>
+                  <p className="text-muted-foreground">
+                    Run diagnostics to start building history
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Diagnostic Settings</CardTitle>
+                <CardDescription>
+                  Configure diagnostic behavior and notifications
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Auto-retry failed tests</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Automatically retry failed tests up to 3 times
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">Configure</Button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Email notifications</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Send email alerts when tests fail
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">Setup</Button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Scheduled diagnostics</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Run diagnostics automatically at regular intervals
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">Configure</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <ReportExporter results={results} historicalData={historicalData} />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

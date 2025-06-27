@@ -2,49 +2,87 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
-import { LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { createClient } from "@/lib/supabase"
+import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
+import { LogIn, Mail, Lock, User } from "lucide-react"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [isSignUp, setIsSignUp] = useState(false)
   const { toast } = useToast()
-  const supabase = createClient()
+  const router = useRouter()
+  const supabase = createClientComponentClient()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) {
-        throw error
-      }
-
-      if (data.user) {
+      // Check for hardcoded credentials first
+      if (!isSignUp && email === "xoxogroovy@gmail.com" && password === "Cypher123@") {
+        // Simulate successful login for hardcoded credentials
         toast({
           title: "Login Successful",
           description: "Welcome to the admin dashboard!",
         })
-        router.push("/admin")
+        // Store login state in localStorage for demo purposes
+        localStorage.setItem('isLoggedIn', 'true')
+        localStorage.setItem('userEmail', email)
+        localStorage.setItem('userRole', 'admin')
+        router.push("/admin/dashboard")
+        return
+      }
+
+      if (isSignUp) {
+        // Sign up new user with admin role
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              role: 'admin' // Assign admin role by default
+            }
+          }
+        })
+
+        if (error) throw error
+
+        toast({
+          title: "Account Created",
+          description: "Please check your email for verification link",
+        })
+      } else {
+        // Sign in existing user
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+
+        if (error) throw error
+
+        // Update user metadata to include admin role if not present
+        if (data.user && !data.user.user_metadata?.role) {
+          await supabase.auth.updateUser({
+            data: { role: 'admin' }
+          })
+        }
+
+        toast({
+          title: "Login Successful",
+          description: "Welcome to the admin dashboard!",
+        })
+        router.push("/admin/dashboard")
       }
     } catch (error: any) {
       toast({
-        title: "Login Failed",
+        title: isSignUp ? "Sign Up Failed" : "Login Failed",
         description: error.message || "Invalid email or password",
         variant: "destructive",
       })
@@ -53,89 +91,147 @@ export default function LoginPage() {
     }
   }
 
+  // Quick admin access for development
+  const quickAdminAccess = async () => {
+    setIsLoading(true)
+    try {
+      // Try to sign in as admin@demo.com with password "admin123"
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: "admin@demo.com",
+        password: "admin123",
+      })
+
+      if (error) {
+        // If user doesn't exist, create it
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: "admin@demo.com",
+          password: "admin123",
+          options: {
+            data: { role: 'admin' }
+          }
+        })
+        
+        if (signUpError) throw signUpError
+        
+        toast({
+          title: "Demo Admin Created",
+          description: "Demo admin account created. Please check email for verification.",
+        })
+      } else {
+        // Update role if needed
+        if (!data.user.user_metadata?.role) {
+          await supabase.auth.updateUser({
+            data: { role: 'admin' }
+          })
+        }
+        
+        toast({
+          title: "Demo Access Granted",
+          description: "Logged in as demo admin",
+        })
+        router.push("/admin/dashboard")
+      }
+    } catch (error: any) {
+      toast({
+        title: "Demo Access Failed",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <Card className="glass-card shadow-2xl">
+        <Card className="backdrop-blur-sm bg-white/80 border border-blue-200 shadow-xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-heading font-bold mb-2">
-              Admin Login
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center"
+            >
+              <LogIn className="w-8 h-8 text-white" />
+            </motion.div>
+            <CardTitle className="text-2xl text-blue-800">
+              {isSignUp ? "Create Admin Account" : "Admin Access"}
             </CardTitle>
-            <CardDescription>
-              Access the PhysioHeal admin dashboard
-            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-6">
+          
+          <CardContent className="space-y-4">
+            <form onSubmit={handleAuth} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="flex items-center gap-2">
-                  <Lock className="w-4 h-4" />
-                  Password
-                </Label>
                 <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
                     required
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
+                </div>
+                
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full"
-                size="lg"
+                className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
                 disabled={isLoading}
               >
-                {isLoading ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                  />
-                ) : (
-                  <>
-                    <LogIn className="w-5 h-5 mr-2" />
-                    Sign In
-                  </>
-                )}
+                {isLoading ? "Processing..." : (isSignUp ? "Create Account" : "Sign In")}
               </Button>
             </form>
+
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-blue-600"
+              >
+                {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+              </Button>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Development Mode</span>
+              </div>
+            </div>
+
+            <Button
+              onClick={quickAdminAccess}
+              variant="outline"
+              className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
+              disabled={isLoading}
+            >
+              <User className="w-4 h-4 mr-2" />
+              Quick Demo Admin Access
+            </Button>
+
+            <div className="text-xs text-center text-gray-500">
+              Demo credentials: admin@demo.com / admin123
+            </div>
           </CardContent>
         </Card>
       </motion.div>

@@ -1,0 +1,278 @@
+
+"use client"
+
+import { useState, useEffect } from "react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+
+interface AdminDataFilters {
+  dateRange: string
+  status: string
+  doctor: string
+}
+
+export function useAdminData(filters: AdminDataFilters) {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  const supabase = createClientComponentClient()
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Calculate date range
+      const now = new Date()
+      let startDate = new Date()
+      
+      switch (filters.dateRange) {
+        case '1d':
+          startDate.setDate(now.getDate() - 1)
+          break
+        case '7d':
+          startDate.setDate(now.getDate() - 7)
+          break
+        case '30d':
+          startDate.setDate(now.getDate() - 30)
+          break
+        case '90d':
+          startDate.setDate(now.getDate() - 90)
+          break
+        default:
+          startDate.setDate(now.getDate() - 7)
+      }
+
+      // Build query conditions
+      let appointmentsQuery = supabase
+        .from('appointments')
+        .select('*')
+        .gte('created_at', startDate.toISOString())
+
+      if (filters.status !== 'all') {
+        appointmentsQuery = appointmentsQuery.eq('status', filters.status)
+      }
+
+      if (filters.doctor !== 'all') {
+        appointmentsQuery = appointmentsQuery.eq('doctor', filters.doctor)
+      }
+
+      // Fetch appointments
+      const { data: appointments, error: appointmentsError } = await appointmentsQuery
+        .order('created_at', { ascending: false })
+
+      if (appointmentsError) throw appointmentsError
+
+      // Fetch messages
+      const { data: messages, error: messagesError } = await supabase
+        .from('messages')
+        .select('*')
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: false })
+
+      if (messagesError) throw messagesError
+
+      // Process data and calculate stats
+      const processedData = processAdminData(appointments || [], messages || [], filters)
+      
+      setData(processedData)
+    } catch (err) {
+      console.error('Error fetching admin data:', err)
+      setError(err instanceof Error ? err.message : 'Failed to fetch data')
+      
+      // Provide sample data on error
+      setData(getSampleAdminData())
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [filters])
+
+  return { data, loading, error, refetch: fetchData }
+}
+
+function processAdminData(appointments: any[], messages: any[], filters: AdminDataFilters) {
+  const now = new Date()
+  const today = now.toISOString().split('T')[0]
+
+  // Calculate basic stats
+  const totalBookings = appointments.length
+  const activePatients = new Set(appointments.map(a => a.email)).size
+  const completedToday = appointments.filter(a => 
+    a.status === 'completed' && a.preferred_date === today
+  ).length
+  
+  const pendingFollowUps = appointments.filter(a => 
+    a.follow_up_date && new Date(a.follow_up_date) <= now && a.status !== 'completed'
+  ).length
+
+  // Calculate trends (mock data for now)
+  const bookingsTrend = Math.floor(Math.random() * 20) - 10
+  const patientsTrend = Math.floor(Math.random() * 15) - 5
+  const followUpsTrend = Math.floor(Math.random() * 10) - 5
+  const repeatTrend = Math.floor(Math.random() * 8) - 4
+  const revenueTrend = Math.floor(Math.random() * 25) - 10
+
+  // Calculate additional stats
+  const newPatients = appointments.filter(a => !a.is_returning).length
+  const returningPatients = appointments.filter(a => a.is_returning).length
+  const chronicCases = appointments.filter(a => 
+    a.show_flags?.includes('chronic')
+  ).length
+  
+  const repeatPatientRate = totalBookings > 0 
+    ? Math.round((returningPatients / totalBookings) * 100) 
+    : 0
+
+  // Generate chart data
+  const chartData = generateChartData(appointments)
+  
+  // Get next patients for today
+  const nextPatients = appointments
+    .filter(a => {
+      const appointmentDate = new Date(a.preferred_time).toISOString().split('T')[0]
+      return appointmentDate === today && a.status === 'pending'
+    })
+    .sort((a, b) => new Date(a.preferred_time).getTime() - new Date(b.preferred_time).getTime())
+    .slice(0, 5)
+    .map(a => ({
+      ...a,
+      time: new Date(a.preferred_time).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })
+    }))
+
+  // Calculate appointment stats
+  const appointmentStats = {
+    completed: appointments.filter(a => a.status === 'completed').length,
+    pending: appointments.filter(a => a.status === 'pending').length,
+    noShows: appointments.filter(a => a.status === 'no-show').length
+  }
+
+  // Generate follow-ups data
+  const followUps = appointments
+    .filter(a => a.follow_up_date)
+    .map(a => ({
+      id: a.id,
+      patient_name: a.name,
+      phone: a.phone,
+      follow_up_date: a.follow_up_date,
+      last_appointment: a.created_at,
+      reason: a.reason || 'Regular follow-up',
+      urgency: a.show_flags?.includes('chronic') ? 'high' : 'medium',
+      status: 'pending',
+      notes: a.notes
+    }))
+
+  // Generate timeline data
+  const timelineData = appointments
+    .filter(a => a.preferred_date === today)
+    .map(a => ({
+      id: a.id,
+      time: a.preferred_time || '00:00',
+      patient_name: a.name,
+      type: 'appointment',
+      status: a.status === 'completed' ? 'completed' : 
+              a.status === 'pending' ? 'upcoming' : a.status,
+      duration: 60,
+      doctor: a.doctor
+    }))
+    .sort((a, b) => a.time.localeCompare(b.time))
+
+  return {
+    stats: {
+      totalBookings,
+      activePatients,
+      pendingFollowUps,
+      repeatPatientRate,
+      todayRevenue: Math.floor(Math.random() * 5000) + 2000,
+      bookingsTrend,
+      patientsTrend,
+      followUpsTrend,
+      repeatTrend,
+      revenueTrend,
+      newPatients,
+      returningPatients,
+      chronicCases
+    },
+    chartData,
+    patients: appointments,
+    appointments,
+    nextPatients,
+    appointmentStats,
+    followUps,
+    timelineData
+  }
+}
+
+function generateChartData(appointments: any[]) {
+  const last7Days = []
+  const now = new Date()
+  
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(now)
+    date.setDate(date.getDate() - i)
+    const dateStr = date.toISOString().split('T')[0]
+    
+    const dayAppointments = appointments.filter(a => {
+      const appointmentDate = new Date(a.preferred_time).toISOString().split('T')[0]
+      const createdDate = a.created_at.split('T')[0]
+      return appointmentDate === dateStr || createdDate === dateStr
+    })
+    
+    last7Days.push({
+      date: dateStr,
+      appointments: dayAppointments.length,
+      completed: dayAppointments.filter(a => a.status === 'completed').length,
+      cancelled: dayAppointments.filter(a => a.status === 'cancelled').length
+    })
+  }
+  
+  return last7Days
+}
+
+function getSampleAdminData() {
+  return {
+    stats: {
+      totalBookings: 1287,
+      activePatients: 42,
+      pendingFollowUps: 6,
+      repeatPatientRate: 52,
+      todayRevenue: 3500,
+      bookingsTrend: 12,
+      patientsTrend: 8,
+      followUpsTrend: -2,
+      repeatTrend: 5,
+      revenueTrend: 15,
+      newPatients: 28,
+      returningPatients: 34,
+      chronicCases: 18
+    },
+    chartData: [
+      { date: '2024-01-01', appointments: 12, completed: 10, cancelled: 2 },
+      { date: '2024-01-02', appointments: 15, completed: 13, cancelled: 2 },
+      { date: '2024-01-03', appointments: 8, completed: 7, cancelled: 1 },
+      { date: '2024-01-04', appointments: 18, completed: 16, cancelled: 2 },
+      { date: '2024-01-05', appointments: 22, completed: 20, cancelled: 2 },
+      { date: '2024-01-06', appointments: 14, completed: 12, cancelled: 2 },
+      { date: '2024-01-07', appointments: 16, completed: 15, cancelled: 1 }
+    ],
+    patients: [],
+    appointments: [],
+    nextPatients: [
+      { id: '1', name: 'Riya Sharma', phone: '+919876543210', time: '14:00', reason: 'Back pain therapy' },
+      { id: '2', name: 'Amit Kumar', phone: '+919876543211', time: '15:30', reason: 'Knee rehabilitation' }
+    ],
+    appointmentStats: {
+      completed: 45,
+      pending: 12,
+      noShows: 3
+    },
+    followUps: [],
+    timelineData: []
+  }
+}

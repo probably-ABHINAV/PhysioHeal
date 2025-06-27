@@ -1,39 +1,72 @@
 
 "use client"
 
-import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
+import { CheckCircle, XCircle, AlertTriangle, Clock } from "lucide-react"
 
 interface StatusBadgeProps {
-  status: 'success' | 'warning' | 'error' | 'running'
-  children: React.ReactNode
-  className?: string
+  status: 'pass' | 'fail' | 'warning' | 'running'
+  showIcon?: boolean
+  size?: 'sm' | 'md' | 'lg'
 }
 
-export function StatusBadge({ status, children, className = "" }: StatusBadgeProps) {
-  const getStatusClasses = () => {
+export function StatusBadge({ status, showIcon = true, size = 'md' }: StatusBadgeProps) {
+  const getStatusConfig = () => {
     switch (status) {
-      case 'success':
-        return "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/25 border-0"
-      case 'error':
-        return "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/25 border-0"
+      case 'pass':
+        return {
+          variant: 'default' as const,
+          label: 'PASS',
+          icon: CheckCircle,
+          className: 'bg-green-100 text-green-800 border-green-200'
+        }
+      case 'fail':
+        return {
+          variant: 'destructive' as const,
+          label: 'FAIL',
+          icon: XCircle,
+          className: 'bg-red-100 text-red-800 border-red-200'
+        }
       case 'warning':
-        return "bg-gradient-to-r from-yellow-500 to-amber-500 text-black shadow-lg shadow-yellow-500/25 border-0"
+        return {
+          variant: 'secondary' as const,
+          label: 'WARNING',
+          icon: AlertTriangle,
+          className: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        }
       case 'running':
-        return "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25 border-0 animate-pulse"
+        return {
+          variant: 'outline' as const,
+          label: 'RUNNING',
+          icon: Clock,
+          className: 'bg-blue-100 text-blue-800 border-blue-200 animate-pulse'
+        }
+      default:
+        return {
+          variant: 'outline' as const,
+          label: 'UNKNOWN',
+          icon: Clock,
+          className: 'bg-gray-100 text-gray-800 border-gray-200'
+        }
     }
   }
 
+  const config = getStatusConfig()
+  const Icon = config.icon
+
+  const sizeClasses = {
+    sm: 'text-xs px-2 py-1',
+    md: 'text-sm px-3 py-1',
+    lg: 'text-base px-4 py-2'
+  }
+
   return (
-    <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      whileHover={{ scale: 1.05 }}
-      transition={{ duration: 0.2 }}
+    <Badge 
+      variant={config.variant}
+      className={`${config.className} ${sizeClasses[size]} flex items-center space-x-1`}
     >
-      <Badge className={`${getStatusClasses()} ${className}`}>
-        {children}
-      </Badge>
-    </motion.div>
+      {showIcon && <Icon className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />}
+      <span>{config.label}</span>
+    </Badge>
   )
 }
