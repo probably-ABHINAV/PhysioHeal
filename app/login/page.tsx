@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+
+// Force dynamic rendering to prevent prerendering errors
+export const dynamic = 'force-dynamic'
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Shield } from "lucide-react"
@@ -32,10 +35,12 @@ export default function LoginPage() {
     try {
       // Check for authorized admin email
       if (formData.email === 'xoxogroovy@gmail.com' && formData.password === 'Cypher123@') {
-        // Store admin session in localStorage
-        localStorage.setItem('isLoggedIn', 'true')
-        localStorage.setItem('userEmail', formData.email)
-        localStorage.setItem('userRole', 'admin')
+        // Store admin session in localStorage (browser only)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('isLoggedIn', 'true')
+          localStorage.setItem('userEmail', formData.email)
+          localStorage.setItem('userRole', 'admin')
+        }
 
         toast({
           title: "Login Successful",
