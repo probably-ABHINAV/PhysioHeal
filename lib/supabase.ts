@@ -355,6 +355,23 @@ export async function addReview(review: Omit<Review, "id" | "created_at">): Prom
     }
   }
 
+  // Trigger AI moderation for the new review
+  if (data && typeof window !== 'undefined') {
+    try {
+      await fetch('/api/moderate-review', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          id: data.id, 
+          review_text: review.comment 
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+    } catch (moderationError) {
+      console.error('AI moderation failed:', moderationError)
+      // Don't fail the review submission if moderation fails
+    }
+  }
+
   return data
 }
 

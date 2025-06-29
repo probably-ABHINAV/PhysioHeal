@@ -158,7 +158,7 @@ export default function AdminDashboardPage() {
 
           {/* Main Dashboard Component */}
           <AdminDashboard user={user} />
-          
+
           {/* Logout Button */}
           <div className="mt-6 flex justify-end">
             <Button onClick={handleLogout} variant="outline">

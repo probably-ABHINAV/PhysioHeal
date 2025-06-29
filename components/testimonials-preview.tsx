@@ -1,13 +1,33 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Star, Quote } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
-const testimonials: any[] = []
+import { getReviews, type Review } from "@/lib/supabase"
 
 export function TestimonialsPreview() {
+  const [testimonials, setTestimonials] = useState<Review[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadApprovedReviews() {
+      try {
+        const reviews = await getReviews()
+        // Filter only approved reviews and take the first 3 for preview
+        const approvedReviews = reviews?.filter(review => review.approved).slice(0, 3) || []
+        setTestimonials(approvedReviews)
+      } catch (error) {
+        console.error('Error loading reviews:', error)
+        setTestimonials([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadApprovedReviews()
+  }, [])
+
   return (
     <section className="py-20 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,7 +48,17 @@ export function TestimonialsPreview() {
 
         {/* Testimonials Grid */}
         <div className="flex items-center justify-center min-h-[200px]">
-          {testimonials.length === 0 ? (
+          {loading ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading testimonials...</p>
+            </motion.div>
+          ) : testimonials.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +76,7 @@ export function TestimonialsPreview() {
             <div className="grid md:grid-cols-3 gap-8 w-full">
               {testimonials.map((testimonial, index) => (
                 <motion.div
-                  key={testimonial.name}
+                  key={testimonial.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -62,20 +92,22 @@ export function TestimonialsPreview() {
                           ))}
                         </div>
                       </div>
-                      <p className="text-muted-foreground mb-6 italic">"{testimonial.content}"</p>
+                      <p className="text-muted-foreground mb-6 italic">"{testimonial.comment}"</p>
                       <div className="flex items-center">
                         <Avatar className="w-12 h-12 mr-4">
-                          <AvatarImage src={testimonial.image || "/placeholder.svg"} alt={testimonial.name} />
+                          <AvatarImage src="/placeholder.svg" alt={testimonial.name || "Anonymous"} />
                           <AvatarFallback>
-                            {testimonial.name
+                            {(testimonial.name || "Anonymous")
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-semibold">{testimonial.name}</div>
-                          <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                          <div className="font-semibold">{testimonial.name || "Anonymous"}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {testimonial.service || "Patient"}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
