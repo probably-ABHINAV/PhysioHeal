@@ -1,193 +1,124 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { MessageCircle, X, Phone, Calendar, HelpCircle } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { MessageCircle, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect } from "react"
 
 export function WhatsAppFloat() {
-  const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    // Show after 3 seconds
-    const timer = setTimeout(() => setIsVisible(true), 3000)
+    setIsClient(true)
+    const timer = setTimeout(() => {
+      setIsVisible(true)
+      // Show tooltip after 3 seconds for first-time users
+      const hasSeenTooltip = localStorage.getItem("whatsapp-tooltip-seen")
+      if (!hasSeenTooltip) {
+        setTimeout(() => {
+          setShowTooltip(true)
+          localStorage.setItem("whatsapp-tooltip-seen", "true")
+          setTimeout(() => setShowTooltip(false), 5000)
+        }, 3000)
+      }
+    }, 2000)
+
     return () => clearTimeout(timer)
   }, [])
 
-  const phoneNumber = "+1234567890" // Replace with actual WhatsApp number
-
-  const quickActions = [
-    {
-      title: "Book Appointment",
-      message: "Hi! I'd like to book a physiotherapy consultation. When is your next available slot?",
-      icon: Calendar,
-      color: "bg-blue-600 hover:bg-blue-700"
-    },
-    {
-      title: "Emergency Contact",
-      message: "Hi! I need urgent physiotherapy assistance. Is anyone available to help?",
-      icon: Phone,
-      color: "bg-red-600 hover:bg-red-700"
-    },
-    {
-      title: "General Inquiry",
-      message: "Hi! I have some questions about your physiotherapy services. Could you help me?",
-      icon: HelpCircle,
-      color: "bg-purple-600 hover:bg-purple-700"
-    }
-  ]
-
-  const openWhatsApp = (message: string) => {
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
-    window.open(url, "_blank")
-    setIsOpen(false)
+  const handleWhatsAppClick = () => {
+    const phoneNumber = "+911234567890"
+    const message = encodeURIComponent("Hi! I would like to know more about your physiotherapy services.")
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer")
   }
 
-  if (!isVisible) return null
+  const handleCallClick = () => {
+    window.location.href = "tel:+917979855427"
+  }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="mb-4"
-          >
-            <Card className="w-80 bg-white shadow-2xl border-0 overflow-hidden">
-              <CardContent className="p-0">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-green-600 to-green-500 text-white p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                        <MessageCircle className="h-6 w-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">PhysioHeal Clinic</h3>
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
-                          <p className="text-xs text-green-100">Online - Typically replies instantly</p>
-                        </div>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setIsOpen(false)}
-                      className="text-white hover:bg-white/20 h-8 w-8 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Body */}
-                <div className="p-4 bg-gray-50">
-                  <div className="space-y-4">
-                    {/* Welcome Message */}
-                    <div className="bg-white rounded-lg p-3 shadow-sm border-l-4 border-green-500">
-                      <p className="text-sm text-gray-700">
-                        👋 <strong>Welcome to PhysioHeal!</strong>
-                      </p>
-                      <p className="text-xs text-gray-600 mt-1">
-                        How can we assist you with your physiotherapy needs today?
-                      </p>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Quick Actions</p>
-                      {quickActions.map((action, index) => {
-                        const Icon = action.icon
-                        return (
-                          <motion.div
-                            key={action.title}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                          >
-                            <Button
-                              onClick={() => openWhatsApp(action.message)}
-                              variant="outline"
-                              className="w-full justify-start hover:bg-gray-100 transition-colors group"
-                            >
-                              <div className={`w-8 h-8 rounded-full ${action.color} flex items-center justify-center mr-3 group-hover:scale-110 transition-transform`}>
-                                <Icon className="h-4 w-4 text-white" />
-                              </div>
-                              <span className="text-sm font-medium">{action.title}</span>
-                            </Button>
-                          </motion.div>
-                        )
-                      })}
-                    </div>
-
-                    {/* Direct Chat Button */}
-                    <div className="pt-2 border-t border-gray-200">
-                      <Button
-                        onClick={() => openWhatsApp("Hi! I'd like to chat with someone about physiotherapy services.")}
-                        className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-md"
-                      >
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        Start Chat
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Floating Button */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.5, type: "spring", stiffness: 500, damping: 30 }}
-      >
-        <Button
-          size="lg"
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-16 h-16 rounded-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 shadow-2xl relative overflow-hidden group"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <AnimatePresence mode="wait">
-            {isOpen ? (
+    <AnimatePresence>
+      {isVisible && isClient && (
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end space-y-3">
+          {/* Tooltip */}
+          <AnimatePresence>
+            {showTooltip && (
               <motion.div
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0, scale: 0.8, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.8, x: 20 }}
+                className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white px-4 py-2 rounded-lg shadow-lg border text-sm max-w-[200px] mr-2"
               >
-                <X className="h-6 w-6 text-white relative z-10" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="whatsapp"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <MessageCircle className="h-6 w-6 text-white relative z-10" />
+                Need help? Chat with us on WhatsApp!
+                <div className="absolute top-1/2 -right-1 transform -translate-y-1/2 w-2 h-2 bg-white dark:bg-gray-800 rotate-45 border-r border-b"></div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Pulse animation */}
-          {!isOpen && (
-            <>
-              <div className="absolute inset-0 rounded-full border-4 border-green-400 animate-ping opacity-30" />
-              <div className="absolute inset-0 rounded-full border-2 border-green-300 animate-pulse opacity-50" />
-            </>
-          )}
-        </Button>
-      </motion.div>
-    </div>
+          {/* Call Button - Mobile Only */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0, y: 20 }}
+            transition={{ delay: 0.2 }}
+            className="sm:hidden"
+          >
+            <Button
+              onClick={handleCallClick}
+              className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg"
+              size="icon"
+              aria-label="Call PhysioHeal Clinic"
+            >
+              <Phone className="w-5 h-5 text-white" />
+            </Button>
+          </motion.div>
+
+          {/* WhatsApp Button */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0, y: 20 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Button
+              onClick={handleWhatsAppClick}
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-green-500 hover:bg-green-600 shadow-lg pulse-glow-3d group relative overflow-hidden"
+              size="icon"
+              aria-label="Chat with PhysioHeal Clinic on WhatsApp"
+            >
+              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white relative z-10" />
+
+              {/* Ripple Effect */}
+              <motion.div
+                className="absolute inset-0 bg-green-400 rounded-full"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.7, 0.3, 0.7],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
+              />
+            </Button>
+          </motion.div>
+
+          {/* Online Status Indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="flex items-center space-x-2 bg-white dark:bg-gray-800 px-3 py-1 rounded-full shadow-md text-xs mr-2"
+          >
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-gray-600 dark:text-gray-300 font-medium">Online</span>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   )
 }
