@@ -1,12 +1,8 @@
-import { ConsultationForm } from "@/components/consultation-form";
+"use client";
+
 import React from "react";
 import { motion } from "framer-motion";
-import { Metadata } from "next"
-
-export const metadata: Metadata = {
-  title: "Book Appointment | PhysioHeal",
-  description: "Book your physiotherapy consultation appointment with our expert team.",
-}
+import { ConsultationForm } from "@/components/consultation-form";
 
 export default function BookPage() {
   return (
