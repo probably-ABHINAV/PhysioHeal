@@ -1,15 +1,17 @@
-"use client";
 
-import React from "react";
-import { motion } from "framer-motion";
-import { ConsultationForm } from "@/components/consultation-form";
+import { Metadata } from "next"
+import { ConsultationForm } from "@/components/consultation-form"
 
-export default function BookPage() {
+export const metadata: Metadata = {
+  title: "Book Appointment | PhysioHeal",
+  description: "Book your physiotherapy consultation appointment with our expert team.",
+}
+
+export default function BookAppointmentPage() {
   return (
     <div className="pt-20 min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="container-mobile py-8 md:py-12">
-        {/* Hero Section */}
-        <motion.div
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -19,22 +21,25 @@ export default function BookPage() {
             Book Your <span className="gradient-text">Consultation</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-            Schedule your personalized physiotherapy consultation with our expert team.
+            Schedule your personalized physiotherapy consultation with our expert team. 
             We'll help you on your journey to recovery and optimal health.
           </p>
         </motion.div>
-
-        <motion.div
+        
+        <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="max-w-md mx-auto"
         >
-          {/* Consultation Form */}
-          <ConsultationForm />
+          <Card className="glass-card card-3d">
+            <CardContent className="p-6 md:p-8">
+              <ConsultationForm />
+            </CardContent>
+          </Card>
         </motion.div>
-
-        <motion.div
+        
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
@@ -52,5 +57,5 @@ export default function BookPage() {
         </motion.div>
       </div>
     </div>
-  );
+  )
 }
