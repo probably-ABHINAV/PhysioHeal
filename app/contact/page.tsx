@@ -1,7 +1,4 @@
-Updated contact page to match homepage theme with consistent design, colors, and animations.
-```
 
-```replit_final_file
 import { Metadata } from "next"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
