@@ -1,8 +1,6 @@
-"use client";
-
+import { ConsultationForm } from "@/components/consultation-form";
 import React from "react";
 import { motion } from "framer-motion";
-import { ConsultationForm } from "@/components/consultation-form";
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
