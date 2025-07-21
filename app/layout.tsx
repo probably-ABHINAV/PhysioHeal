@@ -8,6 +8,7 @@ import { Navbar } from "@/components/navbar"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
 import { Toaster } from "@/components/ui/toaster"
 import { organizationSchema, localBusinessSchema, medicalOrganizationSchema } from "@/lib/schemas"
+import { MobileBottomNav } from '@/components/mobile-bottom-nav'
 
 const inter = Inter({
   subsets: ["latin"],
@@ -163,6 +164,7 @@ export default function RootLayout({
             <WhatsAppFloat />
             <Toaster />
           </div>
+          <MobileBottomNav />
         </ThemeProvider>
       </body>
     </html>

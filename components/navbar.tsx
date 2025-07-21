@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Phone, Calendar, Sparkles } from "lucide-react"
+import { Menu, X, Phone, Calendar, Sun, Moon, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
+import { useTheme } from "next-themes"
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -21,7 +21,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
-  
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -126,6 +126,17 @@ export function Navbar() {
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+              {/* Theme Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="relative overflow-hidden w-8 h-8 sm:w-10 sm:h-10 focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label="Toggle theme"
+              >
+                <Sun className="h-4 w-4 sm:h-5 sm:w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 sm:h-5 sm:w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              </Button>
 
               {/* Call Button - Hidden on mobile */}
               <Button
