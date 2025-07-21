@@ -246,7 +246,7 @@ export function ReviewsManagement({ onUpdate }: ReviewsManagementProps) {
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filter reviews" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[9999] bg-white shadow-2xl border-2">
                 <SelectItem value="pending">Pending ({pendingCount})</SelectItem>
                 <SelectItem value="approved">Approved ({approvedCount})</SelectItem>
                 <SelectItem value="all">All Reviews</SelectItem>

@@ -45,7 +45,7 @@ export function Hero3D() {
     }
   }, [x, rotateX, rotateY])
 
-  // Reduced particles for mobile performance
+  // Reduced particles for better performance
   const [particles, setParticles] = useState<Array<{
     id: number;
     x: number;
@@ -68,13 +68,13 @@ export function Hero3D() {
   }, [])
 
   useEffect(() => {
-    const particleCount = isMobile ? 20 : 50
+    const particleCount = isMobile ? 3 : 6 // Further reduced for better performance
     const newParticles = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      delay: Math.random() * 2,
+      size: Math.random() * 2 + 1,
+      delay: Math.random() * 3,
     }))
     setParticles(newParticles)
   }, [isMobile])
@@ -97,13 +97,12 @@ export function Hero3D() {
               width: particle.size,
               height: particle.size,
             }}
-            animate={{
+            animate={isMobile ? {} : {
               y: [-10, 10, -10],
-              x: [-5, 5, -5],
-              opacity: [0.3, 0.8, 0.3],
+              opacity: [0.4, 0.7, 0.4],
             }}
             transition={{
-              duration: 4 + particle.delay,
+              duration: 8 + particle.delay,
               repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut",
               delay: particle.delay,
@@ -121,7 +120,7 @@ export function Hero3D() {
             rotate: [0, 180, 360],
           }}
           transition={{
-            duration: isMobile ? 15 : 20,
+            duration: 25,
             repeat: Number.POSITIVE_INFINITY,
             ease: "linear",
           }}
@@ -154,13 +153,15 @@ export function Hero3D() {
               transition={{ delay: 0.2, duration: 0.8 }}
               className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 mb-6 sm:mb-8"
             >
-              <Badge
-                variant="secondary"
-                className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium glass-effect hover:scale-105 transition-transform"
-              >
-                <Award className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                5+ Years Experience
-              </Badge>
+              <div className="inline-block">
+                <Badge
+                  variant="secondary"
+                  className="px-4 py-2 text-sm font-medium glass-effect hover:scale-105 transition-transform flex items-center gap-2"
+                >
+                  <Award className="w-4 h-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">5+ Years Experience</span>
+                </Badge>
+              </div>
               <Badge
                 variant="outline"
                 className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm glass-effect hover:scale-105 transition-transform"

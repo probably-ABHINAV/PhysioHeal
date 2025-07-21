@@ -146,17 +146,28 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-20 md:pt-6">
       {/* Header with Controls */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 px-4 pb-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
             Admin Dashboard
           </h1>
-          <p className="text-muted-foreground flex items-center gap-2 mt-1">
+          <p className="text-muted-foreground flex items-center gap-2 mt-2 text-sm">
             Real-time clinic analytics and patient management
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-xs">{isConnected ? 'Live' : 'Offline'}</span>
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+              loading ? 'bg-blue-100 text-blue-700 border-blue-200' :
+              isConnected ? 'bg-green-100 text-green-700 border-green-200' : 
+              'bg-red-100 text-red-700 border-red-200'
+            }`}>
+              <div className={`w-2.5 h-2.5 rounded-full ${
+                loading ? 'bg-blue-500 animate-spin border border-white' :
+                isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+              }`} />
+              <span className="text-xs font-semibold">
+                {loading ? 'Syncing...' : isConnected ? 'Online' : 'Offline'}
+              </span>
+            </div>
           </p>
         </div>
 
@@ -243,8 +254,8 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
 
       {/* Main Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6 mb-6">
+          <TabsTrigger value="overview" className="flex items-center gap-2 min-h-[44px]">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
           </TabsTrigger>
