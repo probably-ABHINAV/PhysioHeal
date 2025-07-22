@@ -8,7 +8,6 @@ import { Navbar } from "@/components/navbar"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
 import { Toaster } from "@/components/ui/toaster"
 import { organizationSchema, localBusinessSchema, medicalOrganizationSchema } from "@/lib/schemas"
-import { MobileBottomNav } from '@/components/mobile-bottom-nav'
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,32 +36,27 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://physioheal.com"),
-  title: {
-    default: "PhysioHeal Clinic | Expert Physiotherapy Care | BPT MPT Ortho",
-    template: "%s | PhysioHeal Clinic",
+  title: 'PhysioHeal India | Best Physiotherapy Treatment & Pain Relief Center',
+  description: 'India\'s trusted physiotherapy clinic with certified therapists. Expert treatment for back pain, joint pain, sports injuries. Same-day appointments available. Book FREE consultation.',
+  keywords: 'physiotherapy India, back pain treatment, joint pain relief, sports injury, certified physiotherapist, pain management, rehabilitation center',
+  openGraph: {
+    title: 'PhysioHeal India - Expert Physiotherapy Treatment',
+    description: 'Get effective physiotherapy treatment from certified professionals. 10+ years experience, 50,000+ successful treatments.',
+    type: 'website',
+    locale: 'en_IN',
+    siteName: 'PhysioHeal India',
   },
-  description:
-    "Trusted physiotherapy clinic with 5+ years experience in orthopedic care. Expert treatment for sports injuries, back pain, and rehabilitation. Book your appointment today!",
-  keywords: [
-    "physiotherapy",
-    "orthopedic care",
-    "sports injury",
-    "back pain",
-    "rehabilitation",
-    "BPT",
-    "MPT",
-    "physiotherapist",
-    "physical therapy",
-    "pain management",
-    "sports medicine",
-    "orthopedic rehabilitation",
-    "manual therapy",
-    "exercise therapy",
-    "post-surgery rehabilitation",
-    "Gurgaon physiotherapy",
-    "Palam Vihar clinic",
-  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   authors: [{ name: "PhysioHeal Clinic" }],
   creator: "PhysioHeal Clinic",
   publisher: "PhysioHeal Clinic",
@@ -71,23 +65,6 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  openGraph: {
-    type: "website",
-    locale: "en_IN",
-    url: "https://physioheal.com",
-    siteName: "PhysioHeal Clinic",
-    title: "PhysioHeal Clinic | Expert Physiotherapy Care",
-    description: "Healing through technology and expert care. 5+ years of trusted physiotherapy services.",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "PhysioHeal Clinic - Modern Physiotherapy Care",
-        type: "image/jpeg",
-      },
-    ],
-  },
   twitter: {
     card: "summary_large_image",
     title: "PhysioHeal Clinic | Expert Physiotherapy Care",
@@ -95,17 +72,6 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
     creator: "@physioheal",
     site: "@physioheal",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
   },
   icons: {
     icon: [
@@ -157,14 +123,13 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`} suppressHydrationWarning>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <div className="relative min-h-screen">
             <Navbar />
             <main className="min-h-screen">{children}</main>
             <WhatsAppFloat />
             <Toaster />
           </div>
-          <MobileBottomNav />
         </ThemeProvider>
       </body>
     </html>

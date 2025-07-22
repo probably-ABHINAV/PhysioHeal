@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -12,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { createClient } from "@/lib/supabase"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 const consultationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -28,7 +27,6 @@ export function ConsultationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const { toast } = useToast()
-  const supabase = createClient()
 
   const {
     register,
@@ -39,37 +37,58 @@ export function ConsultationForm() {
     resolver: zodResolver(consultationSchema),
   })
 
+  const [supabaseError, setSupabaseError] = useState<string | null>(null)
+  const supabase = useMemo(() => {
+    try {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        setSupabaseError('Supabase not configured. Form will work in demo mode.')
+        return null
+      }
+      return createClientComponentClient()
+    } catch (error) {
+      setSupabaseError('Supabase initialization failed. Form will work in demo mode.')
+      return null
+    }
+  }, [])
+
   const onSubmit = async (data: ConsultationFormData) => {
     setIsSubmitting(true)
-    
-    try {
-      const { error } = await supabase.from('appointments').insert({
-        name: data.name,
-        phone: data.phone,
-        email: data.email || null,
-        reason: data.reason,
-        preferred_time: new Date(data.preferred_time).toISOString(),
-        status: 'pending',
-      })
 
-      if (error) {
-        throw error
+    try {
+      if (supabase) {
+        const { error } = await supabase
+          .from('appointments')
+          .insert([
+            {
+              name: data.name,
+              phone: data.phone,
+              email: data.email || null,
+              reason: data.reason,
+              preferred_time: new Date(data.preferred_time).toISOString(),
+              status: 'pending',
+              created_at: new Date().toISOString()
+            }
+          ])
+
+        if (error) throw error
       }
 
       setIsSuccess(true)
       reset()
-      
+
       toast({
-        title: "Appointment Booked Successfully!",
-        description: "We'll contact you soon to confirm your appointment.",
+        title: "Appointment Request Sent!",
+        description: supabase
+          ? "We'll contact you via WhatsApp to confirm your appointment."
+          : "Demo mode: Form submitted successfully. In production, this would be saved to database.",
       })
 
       // WhatsApp prefill link
       const whatsappMessage = encodeURIComponent(
-        `Hi! I've just booked a consultation appointment. My name is ${data.name} and my preferred time is ${data.preferred_time}. Reason: ${data.reason}`
+        `Hi! I'd like to book a consultation appointment. My name is ${data.name} and my preferred time is ${data.preferred_time}. Reason: ${data.reason}`
       )
       const whatsappUrl = `https://wa.me/917979855427?text=${whatsappMessage}`
-      
+
       setTimeout(() => {
         window.open(whatsappUrl, '_blank')
       }, 2000)
@@ -77,8 +96,8 @@ export function ConsultationForm() {
     } catch (error) {
       console.error('Error booking appointment:', error)
       toast({
-        title: "Booking Failed",
-        description: "There was an error booking your appointment. Please try again.",
+        title: "Request Failed",
+        description: "There was an error. Please try contacting us directly via WhatsApp.",
         variant: "destructive",
       })
     } finally {
@@ -108,6 +127,9 @@ export function ConsultationForm() {
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-6 max-w-md mx-auto"
     >
+      {supabaseError && (
+        <div className="text-red-500 text-sm">{supabaseError}</div>
+      )}
       <div className="space-y-2">
         <Label htmlFor="name" className="flex items-center gap-2">
           <User className="w-4 h-4" />

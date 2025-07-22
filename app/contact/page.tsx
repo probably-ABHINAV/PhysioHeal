@@ -1,287 +1,320 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { MapPin, Phone, Mail, Clock, Navigation, MessageSquare } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
+import { Badge } from "@/components/ui/badge"
+import { 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Clock,
+  MessageCircle,
+  Calendar,
+  Navigation,
+  Users
+} from "lucide-react"
+import Link from "next/link"
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: "",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const { toast } = useToast()
-
-  // Get user's location
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          })
-        },
-        (error) => {
-          console.log("Location access denied:", error)
-        },
-      )
+  const contactInfo = [
+    {
+      icon: MapPin,
+      title: "Visit Our Clinic",
+      details: [
+        "PhysioHeal Rehabilitation Center",
+        "Sector 14, Golf Course Road",
+        "Gurgaon, Haryana 122001"
+      ],
+      action: "Get Directions",
+      actionIcon: Navigation
+    },
+    {
+      icon: Phone,
+      title: "Call Us",
+      details: [
+        "+91 98765 43210",
+        "+91 11 4567 8900",
+        "Emergency: +91 90123 45678"
+      ],
+      action: "Call Now",
+      actionIcon: Phone
+    },
+    {
+      icon: Mail,
+      title: "Email Us",
+      details: [
+        "info@physioheal.com",
+        "appointments@physioheal.com",
+        "emergency@physioheal.com"
+      ],
+      action: "Send Email",
+      actionIcon: Mail
+    },
+    {
+      icon: Clock,
+      title: "Working Hours",
+      details: [
+        "Mon - Fri: 8:00 AM - 8:00 PM",
+        "Saturday: 9:00 AM - 6:00 PM",
+        "Sunday: 10:00 AM - 4:00 PM"
+      ],
+      action: "Book Appointment",
+      actionIcon: Calendar
     }
-  }, [])
+  ]
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const departments = [
+    { name: "Orthopedic", phone: "+91 98765 43211", hours: "8 AM - 8 PM" },
+    { name: "Neurological", phone: "+91 98765 43212", hours: "9 AM - 7 PM" },
+    { name: "Sports Medicine", phone: "+91 98765 43213", hours: "7 AM - 9 PM" },
+    { name: "Pediatric", phone: "+91 98765 43214", hours: "10 AM - 6 PM" },
+    { name: "Emergency", phone: "+91 90123 45678", hours: "24/7" }
+  ]
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    toast({
-      title: "Message Sent!",
-      description: "We'll get back to you within 24 hours.",
-    })
-
-    setIsSubmitting(false)
-    setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
-  }
-
-  const clinicLocation = {
-    lat: 28.5021, // Palam Vihar coordinates
-    lng: 77.046,
-    address: "E-99, 201, 2nd floor, dhram colony, palam vihar 122017",
-  }
-
-  const getDirectionsUrl = () => {
-    if (userLocation) {
-      return `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${clinicLocation.lat},${clinicLocation.lng}`
-    }
-    return `https://www.google.com/maps/search/?api=1&query=${clinicLocation.lat},${clinicLocation.lng}`
+    // Handle form submission
+    console.log("Form submitted")
   }
 
   return (
-    <div className="pt-20">
+    <div className="pt-20 min-h-screen bg-gradient-to-br from-background via-muted/30 to-primary/5">
       {/* Hero Section */}
-      <section className="py-12 bg-gradient-to-br from-background via-background to-primary/5">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">
-              Get In <span className="gradient-text">Touch</span>
+      <section className="py-20 bg-gradient-to-br from-background via-background to-primary/5">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10" />
+        <div className="relative max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <h1 className="text-4xl md:text-6xl font-bold font-heading text-foreground mb-6">
+              Contact <span className="text-primary">PhysioHeal</span>
             </h1>
-            <p className="text-xl text-muted-foreground">We're here to help you on your journey to better health</p>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Get in touch with our expert team. We're here to help you on your journey to better health and wellness.
+            </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Contact Content */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 gap-8">
+      {/* Quick Actions */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8 -mt-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              <Button asChild className="w-full h-16 text-lg bg-primary hover:bg-primary/90">
+                <Link href="/book-appointment">
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Book Appointment
+                </Link>
+              </Button>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <Button asChild variant="outline" className="w-full h-16 text-lg border-primary text-primary hover:bg-primary/10">
+                <Link href="tel:+919876543210">
+                  <Phone className="w-5 h-5 mr-2" />
+                  Call Now
+                </Link>
+              </Button>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <Button asChild variant="outline" className="w-full h-16 text-lg border-secondary text-secondary hover:bg-secondary/10">
+                <Link href="https://wa.me/919876543210">
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  WhatsApp
+                </Link>
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Information */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-heading text-foreground mb-4">
+              Get In Touch
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Multiple ways to reach us for appointments, inquiries, or emergency care
+            </p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-4 gap-6 mb-16">
+            {contactInfo.map((info, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 border-primary/20">
+                  <CardHeader className="text-center">
+                    <info.icon className="w-12 h-12 text-primary mx-auto mb-3" />
+                    <CardTitle className="text-lg font-heading">{info.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <div className="space-y-2 mb-4">
+                      {info.details.map((detail, idx) => (
+                        <p key={idx} className="text-muted-foreground text-sm">{detail}</p>
+                      ))}
+                    </div>
+                    <Button size="sm" variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">
+                      <info.actionIcon className="w-4 h-4 mr-2" />
+                      {info.action}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Contact Form and Map */}
+          <div className="grid lg:grid-cols-2 gap-12">
             {/* Contact Form */}
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-2">
-              <Card>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-primary/20 shadow-lg">
                 <CardHeader>
-                  <CardTitle>Send us a Message</CardTitle>
-                  <CardDescription>
-                    Fill out the form below and we'll get back to you as soon as possible
-                  </CardDescription>
+                  <CardTitle className="text-2xl font-heading">Send Us a Message</CardTitle>
+                  <p className="text-muted-foreground">
+                    Fill out the form below and we'll get back to you within 24 hours
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="name">Full Name *</Label>
-                        <Input
-                          id="name"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          required
-                          placeholder="Your full name"
-                        />
+                        <label className="text-sm font-medium mb-2 block">First Name *</label>
+                        <Input placeholder="Enter your first name" required />
                       </div>
                       <div>
-                        <Label htmlFor="email">Email Address *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          required
-                          placeholder="your.email@example.com"
-                        />
+                        <label className="text-sm font-medium mb-2 block">Last Name *</label>
+                        <Input placeholder="Enter your last name" required />
                       </div>
                     </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          placeholder="+91 98765 43210"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="subject">Subject *</Label>
-                        <Input
-                          id="subject"
-                          value={formData.subject}
-                          onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                          required
-                          placeholder="How can we help?"
-                        />
-                      </div>
-                    </div>
-
                     <div>
-                      <Label htmlFor="message">Message *</Label>
-                      <Textarea
-                        id="message"
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        required
-                        placeholder="Tell us more about your inquiry..."
-                        rows={6}
+                      <label className="text-sm font-medium mb-2 block">Email *</label>
+                      <Input type="email" placeholder="Enter your email" required />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Phone Number *</label>
+                      <Input type="tel" placeholder="Enter your phone number" required />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Service Needed</label>
+                      <select className="w-full px-3 py-2 border border-input rounded-md bg-background">
+                        <option value="">Select a service</option>
+                        <option value="orthopedic">Orthopedic Physiotherapy</option>
+                        <option value="neurological">Neurological Rehabilitation</option>
+                        <option value="sports">Sports Injury</option>
+                        <option value="pediatric">Pediatric Care</option>
+                        <option value="pain">Pain Management</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Message *</label>
+                      <Textarea 
+                        placeholder="Tell us about your condition or questions..."
+                        rows={5}
+                        required 
                       />
                     </div>
-
-                    <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                          Sending Message...
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="w-4 h-4 mr-2" />
-                          Send Message
-                        </>
-                      )}
+                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+                      Send Message
                     </Button>
                   </form>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Contact Information */}
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-              {/* Quick Contact */}
-              <Card>
+            {/* Location and Departments */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <Card className="border-secondary/20 shadow-lg">
                 <CardHeader>
-                  <CardTitle>Quick Contact</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Phone</div>
-                      <a href="tel:+919876543210" className="text-primary hover:underline">
-                        +91 98765 43210
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Mail className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Email</div>
-                      <a href="mailto:info@physioheal.com" className="text-primary hover:underline">
-                        info@physioheal.com
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <MessageSquare className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium">WhatsApp</div>
-                      <a
-                        href="https://api.whatsapp.com/send?phone=+919876543210&text=Hi! I'd like to know more about your services."
-                        target="_blank"
-                        className="text-green-600 hover:underline"
-                        rel="noreferrer"
-                      >
-                        Chat with us
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Location */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <MapPin className="w-5 h-5 mr-2 text-primary" />
+                  <CardTitle className="text-2xl font-heading flex items-center">
+                    <MapPin className="w-6 h-6 text-secondary mr-2" />
                     Our Location
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">{clinicLocation.address}</p>
-
-                    <div className="space-y-2">
-                      <Button size="sm" className="w-full" asChild>
-                        <a href={getDirectionsUrl()} target="_blank" rel="noreferrer">
-                          <Navigation className="w-4 h-4 mr-2" />
-                          Get Directions
-                        </a>
-                      </Button>
-
-                      {userLocation && (
-                        <p className="text-xs text-muted-foreground text-center">
-                          Directions from your current location
-                        </p>
-                      )}
+                  <div className="aspect-video bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center mb-4">
+                    <div className="text-center">
+                      <MapPin className="w-12 h-12 text-primary mx-auto mb-2" />
+                      <p className="text-muted-foreground">Interactive Map</p>
+                      <p className="text-sm text-muted-foreground">Golf Course Road, Gurgaon</p>
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-semibold">PhysioHeal Rehabilitation Center</p>
+                    <p className="text-muted-foreground text-sm">
+                      Sector 14, Golf Course Road<br/>
+                      Gurgaon, Haryana 122001<br/>
+                      Near Metro Station
+                    </p>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Hours */}
-              <Card>
+              <Card className="border-primary/20 shadow-lg">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Clock className="w-5 h-5 mr-2 text-primary" />
-                    Clinic Hours
+                  <CardTitle className="text-xl font-heading flex items-center">
+                    <Users className="w-5 h-5 text-primary mr-2" />
+                    Department Contact
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Monday - Friday</span>
-                      <span className="font-medium">9:00 AM - 7:00 PM</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Saturday</span>
-                      <span className="font-medium">9:00 AM - 5:00 PM</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Sunday</span>
-                      <span className="font-medium text-red-600">Closed</span>
-                    </div>
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-muted-foreground">Emergency consultations available 24/7</p>
-                    </div>
+                  <div className="space-y-3">
+                    {departments.map((dept, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-primary/5 rounded-lg">
+                        <div>
+                          <p className="font-semibold text-sm">{dept.name}</p>
+                          <p className="text-xs text-muted-foreground">{dept.hours}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-primary text-sm font-medium">{dept.phone}</p>
+                          <Badge variant="secondary" className="text-xs mt-1">
+                            Direct Line
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -290,26 +323,34 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Map Section */}
-      <section className="py-12 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-heading font-bold mb-4">Find Us on the Map</h2>
-              <p className="text-muted-foreground">Located in the heart of the medical district for easy access</p>
-            </div>
-
-            <div className="rounded-lg overflow-hidden shadow-lg">
-              <iframe
-                src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3501.674994842842!2d${clinicLocation.lng}!3d${clinicLocation.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDM2JzUwLjAiTiA3N8KwMTInMzIuNCJF!5e0!3m2!1sen!2sin!4v1234567890123`}
-                width="100%"
-                height="400"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="PhysioHeal Clinic Location"
-              />
+      {/* Emergency Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary text-white">
+        <div className="max-w-5xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">
+              Need Emergency Care?
+            </h2>
+            <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
+              For urgent physiotherapy needs or severe pain, contact our emergency line immediately.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" variant="secondary">
+                <Link href="tel:+919012345678">
+                  <Phone className="w-5 h-5 mr-2" />
+                  Emergency: +91 90123 45678
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-primary">
+                <Link href="https://wa.me/919012345678">
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Emergency WhatsApp
+                </Link>
+              </Button>
             </div>
           </motion.div>
         </div>

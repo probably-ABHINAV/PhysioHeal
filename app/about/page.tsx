@@ -1,204 +1,157 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Award, Users, Heart, Target, CheckCircle } from "lucide-react"
+import { Shield, Award, Users, Clock, Heart, Target, Eye } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-
-const milestones = [
-  {
-    year: "2019",
-    title: "Clinic Founded",
-    description: "Started with a vision to provide exceptional physiotherapy care",
-  },
-  { year: "2020", title: "Advanced Equipment", description: "Invested in state-of-the-art physiotherapy equipment" },
-  { year: "2021", title: "100+ Patients", description: "Reached our first major milestone of treating 100 patients" },
-  {
-    year: "2022",
-    title: "Specialized Programs",
-    description: "Launched specialized programs for sports injuries and geriatric care",
-  },
-  {
-    year: "2023",
-    title: "Digital Integration",
-    description: "Introduced online consultations and digital health tracking",
-  },
-  { year: "2024", title: "500+ Success Stories", description: "Celebrating over 500 successful patient recoveries" },
-]
-
-const values = [
-  {
-    icon: Heart,
-    title: "Compassionate Care",
-    description: "We treat every patient with empathy, understanding, and genuine care for their wellbeing.",
-  },
-  {
-    icon: Target,
-    title: "Excellence",
-    description: "We strive for excellence in every treatment, using the latest techniques and best practices.",
-  },
-  {
-    icon: Users,
-    title: "Patient-Centered",
-    description: "Our approach is always centered around the individual needs and goals of each patient.",
-  },
-  {
-    icon: Award,
-    title: "Professional Integrity",
-    description: "We maintain the highest standards of professional ethics and clinical excellence.",
-  },
-]
-
-const certifications = [
-  "Bachelor of Physiotherapy (BPT)",
-  "Master of Physiotherapy - Orthopedics (MPT Ortho)",
-  "Certified Manual Therapy Specialist",
-  "Sports Injury Rehabilitation Certificate",
-  "Dry Needling Certification",
-  "Neurological Rehabilitation Specialist",
-]
+import Link from "next/link"
 
 export default function AboutPage() {
+  const values = [
+    {
+      icon: Heart,
+      title: "Patient-Centered Care",
+      description: "We put our patients at the heart of everything we do, ensuring personalized treatment plans."
+    },
+    {
+      icon: Shield,
+      title: "Evidence-Based Treatment",
+      description: "Our treatments are backed by the latest research and proven methodologies."
+    },
+    {
+      icon: Users,
+      title: "Collaborative Approach",
+      description: "We work closely with patients and their families to achieve the best outcomes."
+    },
+    {
+      icon: Award,
+      title: "Excellence in Care",
+      description: "Committed to delivering the highest quality physiotherapy services."
+    }
+  ]
+
+  const team = [
+    {
+      name: "Dr. Priya Sharma",
+      role: "Head Physiotherapist",
+      experience: "12+ years",
+      specialization: "Orthopedic & Sports Rehabilitation"
+    },
+    {
+      name: "Dr. Rajesh Kumar",
+      role: "Senior Physiotherapist",
+      experience: "8+ years",
+      specialization: "Neurological Rehabilitation"
+    },
+    {
+      name: "Dr. Anita Singh",
+      role: "Physiotherapist",
+      experience: "6+ years",
+      specialization: "Women's Health & Pediatrics"
+    }
+  ]
+
   return (
-    <div className="pt-20">
+    <div className="pt-20 min-h-screen bg-gradient-to-br from-background via-muted/30 to-primary/5">
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-br from-background via-background to-primary/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">
-                About <span className="gradient-text">PhysioHeal</span>
-              </h1>
-              <p className="text-xl text-muted-foreground mb-8">
-                Dedicated to providing exceptional physiotherapy care with a personal touch. Our mission is to help you
-                achieve optimal health and mobility through evidence-based treatment and compassionate care.
-              </p>
-
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary mb-2">5+</div>
-                  <div className="text-sm text-muted-foreground">Years Experience</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary mb-2">500+</div>
-                  <div className="text-sm text-muted-foreground">Patients Treated</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary mb-2">98%</div>
-                  <div className="text-sm text-muted-foreground">Success Rate</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary mb-2">4.9</div>
-                  <div className="text-sm text-muted-foreground">Average Rating</div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">BPT Certified</Badge>
-                <Badge variant="secondary">MPT Ortho</Badge>
-                <Badge variant="secondary">5+ Years Experience</Badge>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="relative">
-              <div className="relative w-full h-[500px] rounded-2xl overflow-hidden">
-                <img
-                  src="/placeholder.svg?height=500&width=600"
-                  alt="Modern physiotherapy clinic"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-              </div>
-            </motion.div>
-          </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10" />
+        <div className="relative max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <h1 className="text-4xl md:text-6xl font-bold font-heading text-foreground mb-6">
+              About <span className="text-primary">PhysioHeal</span>
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              India's trusted physiotherapy clinic dedicated to helping you achieve optimal health and wellness through expert care and personalized treatment.
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* Our Story Timeline */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-              Our <span className="gradient-text">Journey</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              From humble beginnings to becoming a trusted name in physiotherapy care
-            </p>
-          </motion.div>
-
-          <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-primary to-secondary rounded-full" />
-
-            <div className="space-y-12">
-              {milestones.map((milestone, index) => (
-                <motion.div
-                  key={milestone.year}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className={`flex items-center ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`}
-                >
-                  <div className={`w-1/2 ${index % 2 === 0 ? "pr-8 text-right" : "pl-8 text-left"}`}>
-                    <Card className="hover:shadow-lg transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="text-2xl font-bold text-primary mb-2">{milestone.year}</div>
-                        <h3 className="text-xl font-semibold mb-2">{milestone.title}</h3>
-                        <p className="text-muted-foreground">{milestone.description}</p>
-                      </CardContent>
-                    </Card>
+      {/* Mission & Vision */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Card className="h-full border-primary/20 shadow-lg hover:shadow-xl transition-shadow">
+                <CardContent className="p-8">
+                  <div className="flex items-center mb-4">
+                    <Target className="w-8 h-8 text-primary mr-3" />
+                    <h3 className="text-2xl font-bold font-heading">Our Mission</h3>
                   </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    To provide world-class physiotherapy services that empower individuals to overcome physical challenges, 
+                    restore mobility, and achieve their health goals through compassionate, evidence-based care.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-                  {/* Timeline dot */}
-                  <div className="relative z-10 w-4 h-4 bg-primary rounded-full border-4 border-background shadow-lg" />
-
-                  <div className="w-1/2" />
-                </motion.div>
-              ))}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Card className="h-full border-secondary/20 shadow-lg hover:shadow-xl transition-shadow">
+                <CardContent className="p-8">
+                  <div className="flex items-center mb-4">
+                    <Eye className="w-8 h-8 text-secondary mr-3" />
+                    <h3 className="text-2xl font-bold font-heading">Our Vision</h3>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    To be India's leading physiotherapy clinic, recognized for innovation, excellence, and transforming 
+                    lives through comprehensive rehabilitation and preventive care services.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Our Values */}
-      <section className="py-20 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Values */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/5">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-              Our <span className="gradient-text">Values</span>
+            <h2 className="text-3xl md:text-4xl font-bold font-heading text-foreground mb-4">
+              Our Core Values
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              The principles that guide everything we do
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              The principles that guide everything we do at PhysioHeal
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
               <motion.div
-                key={value.title}
+                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="h-full text-center hover:shadow-lg transition-all duration-300 group">
+                <Card className="h-full text-center hover:shadow-lg transition-all hover:-translate-y-1">
                   <CardContent className="p-6">
-                    <div className="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                      <value.icon className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3">{value.title}</h3>
-                    <p className="text-muted-foreground">{value.description}</p>
+                    <value.icon className="w-12 h-12 text-primary mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold font-heading mb-3">{value.title}</h3>
+                    <p className="text-muted-foreground text-sm">{value.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -207,45 +160,99 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Certifications */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Team Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-              Professional <span className="gradient-text">Credentials</span>
+            <h2 className="text-3xl md:text-4xl font-bold font-heading text-foreground mb-4">
+              Meet Our Expert Team
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our qualifications and certifications ensure you receive the highest quality care
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Our certified physiotherapists bring years of experience and specialized expertise
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certifications.map((cert, index) => (
+          <div className="grid md:grid-cols-3 gap-8">
+            {team.map((member, index) => (
               <motion.div
-                key={cert}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="hover:shadow-lg transition-all duration-300 group">
-                  <CardContent className="p-6 flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      <CheckCircle className="w-6 h-6 text-primary" />
+                <Card className="text-center hover:shadow-lg transition-all hover:-translate-y-1">
+                  <CardContent className="p-8">
+                    <div className="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold">
+                      {member.name.split(' ').map(n => n[0]).join('')}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{cert}</h3>
-                    </div>
+                    <h3 className="text-xl font-bold font-heading mb-2">{member.name}</h3>
+                    <p className="text-primary font-semibold mb-2">{member.role}</p>
+                    <p className="text-muted-foreground text-sm mb-2">{member.experience}</p>
+                    <p className="text-muted-foreground text-sm">{member.specialization}</p>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 text-center">
+            {[
+              { number: "10+", label: "Years Experience" },
+              { number: "50,000+", label: "Patients Treated" },
+              { number: "15+", label: "Specialized Services" },
+              { number: "95%", label: "Success Rate" }
+            ].map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <div className="text-4xl font-bold font-heading mb-2">{stat.number}</div>
+                <div className="text-primary-foreground/80">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-primary/10 to-secondary/10">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-heading text-foreground mb-4">
+              Ready to Start Your Healing Journey?
+            </h2>
+            <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Take the first step towards better health. Book your consultation today and experience the PhysioHeal difference.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+                <Link href="/book-appointment">Book Appointment</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/contact">Contact Us</Link>
+              </Button>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>

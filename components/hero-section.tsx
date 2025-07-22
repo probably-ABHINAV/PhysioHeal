@@ -8,7 +8,7 @@ import Link from "next/link"
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden hero-bg">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
@@ -133,11 +133,11 @@ export function HeroSection() {
                     <div className="text-6xl lg:text-8xl">🏥</div>
                   </motion.div>
 
-                  {/* Floating elements */}
+                  {/* Floating elements with fixed positions */}
                   <motion.div
                     animate={{ rotate: 360, scale: [1, 1.1, 1] }}
                     transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                    className="absolute -top-4 -right-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-lg"
+                    className="absolute top-4 right-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-lg"
                   >
                     <span className="text-white text-2xl">💪</span>
                   </motion.div>
@@ -145,7 +145,7 @@ export function HeroSection() {
                   <motion.div
                     animate={{ rotate: -360, scale: [1, 1.2, 1] }}
                     transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut", delay: 1 }}
-                    className="absolute -bottom-4 -left-4 w-20 h-20 bg-secondary rounded-full flex items-center justify-center shadow-lg"
+                    className="absolute bottom-4 left-4 w-20 h-20 bg-secondary rounded-full flex items-center justify-center shadow-lg"
                   >
                     <span className="text-white text-2xl">🦴</span>
                   </motion.div>
@@ -153,7 +153,7 @@ export function HeroSection() {
                   <motion.div
                     animate={{ y: [-5, 5, -5], x: [-5, 5, -5] }}
                     transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut", delay: 2 }}
-                    className="absolute top-8 -left-8 w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg"
+                    className="absolute top-16 left-8 w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg"
                   >
                     <span className="text-white text-lg">⚡</span>
                   </motion.div>

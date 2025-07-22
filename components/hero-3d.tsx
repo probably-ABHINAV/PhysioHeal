@@ -59,7 +59,7 @@ export function Hero3D() {
     const checkMobile = () => {
       setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768)
     }
-    
+
     checkMobile()
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', checkMobile)
@@ -408,34 +408,17 @@ export function Hero3D() {
                       <motion.div
                         key={index}
                         className={`absolute ${element.size} ${element.color} rounded-full flex items-center justify-center shadow-lg glass-effect`}
-                        style={{
-                          top: "50%",
-                          left: "50%",
-                          marginTop: `-${element.size.includes("w-10") ? "20px" : element.size.includes("w-12") ? "24px" : element.size.includes("w-14") ? "28px" : element.size.includes("w-16") ? "32px" : element.size.includes("w-18") ? "36px" : element.size.includes("w-20") ? "40px" : "48px"}`,
-                          marginLeft: `-${element.size.includes("w-10") ? "20px" : element.size.includes("w-12") ? "24px" : element.size.includes("w-14") ? "28px" : element.size.includes("w-16") ? "32px" : element.size.includes("w-18") ? "36px" : element.size.includes("w-20") ? "40px" : "48px"}`,
-                        }}
                         animate={{
-                          rotate: [0, 360],
-                          x: [
-                            Math.cos(0) * element.orbit,
-                            Math.cos(Math.PI / 2) * element.orbit,
-                            Math.cos(Math.PI) * element.orbit,
-                            Math.cos((3 * Math.PI) / 2) * element.orbit,
-                            Math.cos(2 * Math.PI) * element.orbit,
-                          ],
-                          y: [
-                            Math.sin(0) * element.orbit,
-                            Math.sin(Math.PI / 2) * element.orbit,
-                            Math.sin(Math.PI) * element.orbit,
-                            Math.sin((3 * Math.PI) / 2) * element.orbit,
-                            Math.sin(2 * Math.PI) * element.orbit,
-                          ],
-                          scale: [1, 1.1, 1],
+                          rotate: 360,
                         }}
                         transition={{
                           duration: element.duration,
                           repeat: Number.POSITIVE_INFINITY,
                           ease: "linear",
+                        }}
+                        style={{
+                          left: `${50 + (index % 2 === 0 ? 20 : -20)}%`,
+                          top: `${50 + (index % 3 === 0 ? 15 : -15)}%`,
                         }}
                       >
                         <span className="text-white text-sm sm:text-base lg:text-xl xl:text-2xl">{element.emoji}</span>
