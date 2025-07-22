@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState } from "react"
+import { useState, Dispatch, SetStateAction, FormEvent } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -11,22 +10,35 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase"
 
 const reviewSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email").optional().or(z.literal("")),
-  rating: z.number().min(1, "Please select a rating").max(5),
+  email: z.string().email("Enter a valid email").optional().or(z.literal("")),
+  rating: z.number().min(1, "Select a rating").max(5),
   comment: z.string().min(10, "Review must be at least 10 characters"),
   service: z.string().optional(),
 })
 
 type ReviewFormData = z.infer<typeof reviewSchema>
 
-export function ReviewForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+type Props = {
+  formData?: ReviewFormData
+  setFormData?: Dispatch<SetStateAction<ReviewFormData>>
+  handleSubmit?: (e: FormEvent<HTMLFormElement>) => Promise<void>
+  isSubmitting?: boolean
+}
+
+export function ReviewForm(props: Props) {
+  const [isSubmittingLocal, setIsSubmittingLocal] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [selectedRating, setSelectedRating] = useState(0)
   const { toast } = useToast()
@@ -41,74 +53,54 @@ export function ReviewForm() {
     watch,
   } = useForm<ReviewFormData>({
     resolver: zodResolver(reviewSchema),
+    defaultValues: props.formData,
   })
 
   const selectedService = watch("service")
 
   const onSubmit = async (data: ReviewFormData) => {
-    setIsSubmitting(true)
-    
+    if (props.handleSubmit) return // handled by parent
+    setIsSubmittingLocal(true)
     try {
-      // Check if Supabase is configured
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        throw new Error('Supabase configuration missing')
-      }
-
       const reviewData = {
         name: data.name,
         email: data.email || null,
         rating: data.rating,
         comment: data.comment,
-        approved: false
+        approved: false,
       }
 
-      const { data: insertedData, error } = await supabase
-        .from('reviews')
-        .insert(reviewData)
-        .select()
+      const { error } = await supabase.from("reviews").insert(reviewData)
 
-      if (error) {
-        console.error('Supabase error:', error)
-        throw new Error(`Database error: ${error.message}`)
-      }
-
-      if (!insertedData || insertedData.length === 0) {
-        throw new Error('No data returned from database')
-      }
+      if (error) throw error
 
       setIsSuccess(true)
       reset()
       setSelectedRating(0)
-      
+
       toast({
         title: "Review Submitted!",
-        description: "Thank you for your feedback. Your review will be published after approval.",
+        description:
+          "Thank you for your feedback. Your review will be published after approval.",
       })
-
     } catch (error: any) {
-      console.error('Error submitting review:', error)
-      
-      let errorMessage = "There was an error submitting your review. Please try again."
-      
-      if (error.message?.includes('configuration missing')) {
-        errorMessage = "Database configuration error. Please contact support."
-      } else if (error.message?.includes('Database error')) {
-        errorMessage = `Database error: ${error.message.replace('Database error: ', '')}`
-      }
-      
       toast({
         title: "Submission Failed",
-        description: errorMessage,
+        description:
+          error.message || "An error occurred. Please try again later.",
         variant: "destructive",
       })
     } finally {
-      setIsSubmitting(false)
+      setIsSubmittingLocal(false)
     }
   }
 
   const handleRatingClick = (rating: number) => {
     setSelectedRating(rating)
     setValue("rating", rating)
+    if (props.setFormData) {
+      props.setFormData((prev) => ({ ...prev, rating }))
+    }
   }
 
   if (isSuccess) {
@@ -119,8 +111,13 @@ export function ReviewForm() {
         className="text-center p-8 bg-green-50 rounded-2xl border border-green-200"
       >
         <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h3 className="text-2xl font-bold text-green-800 mb-2">Review Submitted!</h3>
-        <p className="text-green-600 mb-4">Thank you for your feedback. Your review will be published after approval.</p>
+        <h3 className="text-2xl font-bold text-green-800 mb-2">
+          Review Submitted!
+        </h3>
+        <p className="text-green-600 mb-4">
+          Thank you for your feedback. Your review will be published after
+          approval.
+        </p>
       </motion.div>
     )
   }
@@ -129,7 +126,7 @@ export function ReviewForm() {
     <motion.form
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={props.handleSubmit || handleSubmit(onSubmit)}
       className="space-y-6"
     >
       <div className="space-y-2">
@@ -212,10 +209,10 @@ export function ReviewForm() {
       <Button
         type="submit"
         className="w-full"
-        disabled={isSubmitting}
+        disabled={props.isSubmitting ?? isSubmittingLocal}
         size="lg"
       >
-        {isSubmitting ? (
+        {(props.isSubmitting ?? isSubmittingLocal) ? (
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
