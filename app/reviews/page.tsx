@@ -56,17 +56,14 @@ export default function ReviewsPage() {
     setIsSubmitting(true)
 
     const reviewData = {
-      name: newReview.name || "Anonymous",
-      rating: newReview.rating,
-      comment: newReview.review_text,
-      service: newReview.service || null,
-    ,
-  approved: false
-,
+  name: newReview.name,
+  rating: newReview.rating,
+  comment: newReview.review_text,
+  service: newReview.service || null,
+  approved: false,
   email: ''
-,
-  updated_at: new Date().toISOString()
 }
+
 
     const addedReview = await addReview(reviewData)
 
