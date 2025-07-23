@@ -1,12 +1,10 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase-server"
 import { Database } from "@/types/supabase"
 import { z } from "zod"
 
-// Define status types for UI and Supabase logging
 export type DiagnosticStatus = "pass" | "fail" | "warning" | "running" | "unknown"
 export type SupabaseLogStatus = "pass" | "fail" | "warning"
 
-// Diagnostic test structure
 export interface DiagnosticTest {
   id: string
   name: string
@@ -18,7 +16,6 @@ export interface DiagnosticTest {
   critical?: boolean
 }
 
-// For visual UI status badge rendering
 export function getOverallStatus(tests: DiagnosticResult[]): DiagnosticStatus {
   if (tests.some((t) => t.status === "fail")) return "fail"
   if (tests.some((t) => t.status === "warning")) return "warning"
@@ -27,7 +24,6 @@ export function getOverallStatus(tests: DiagnosticResult[]): DiagnosticStatus {
   return "unknown"
 }
 
-// Result after a test run
 export interface DiagnosticResult {
   id: string
   name: string
@@ -36,12 +32,10 @@ export interface DiagnosticResult {
   meta?: Record<string, any>
 }
 
-// Convert frontend UI status to a Supabase-safe loggable status
 function normalizeToSupabaseStatus(status: DiagnosticStatus): SupabaseLogStatus {
   return status === "warning" || status === "pass" || status === "fail" ? status : "fail"
 }
 
-// Log diagnostic result to Supabase
 export async function logDiagnostic(result: {
   test_name: string
   run_status: SupabaseLogStatus
@@ -61,7 +55,6 @@ export async function logDiagnostic(result: {
   })
 }
 
-// Master runner function
 export async function runDiagnostics(tests: DiagnosticTest[]): Promise<DiagnosticResult[]> {
   const results: DiagnosticResult[] = []
 
@@ -79,7 +72,6 @@ export async function runDiagnostics(tests: DiagnosticTest[]): Promise<Diagnosti
 
       results.push(result)
 
-      // Log to Supabase
       await logDiagnostic({
         test_name: test.name,
         run_status: normalizeToSupabaseStatus(status),
