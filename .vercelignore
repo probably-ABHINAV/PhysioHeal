@@ -1,0 +1,14 @@
+# Ignore node modules
+node_modules
+# Ignore git
+.git
+# Ignore lock files for safety
+package-lock.json
+pnpm-lock.yaml
+# Ignore build artifacts
+.next
+out
+# Ignore logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

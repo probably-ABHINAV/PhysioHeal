@@ -1,0 +1,76 @@
+{
+  "name": "PhysioHeal Clinic - Expert Physiotherapy Care",
+  "short_name": "PhysioHeal",
+  "description": "Trusted physiotherapy clinic with 5+ years experience in orthopedic care, sports injury recovery, and rehabilitation therapy.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8feff",
+  "theme_color": "#00adb5",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Book Appointment",
+      "short_name": "Book",
+      "description": "Book an appointment with our physiotherapists",
+      "url": "/book-appointment",
+      "icons": [
+        {
+          "src": "/calendar-icon.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Call Clinic",
+      "short_name": "Call",
+      "description": "Call PhysioHeal Clinic directly",
+      "url": "tel:+917979855427",
+      "icons": [
+        {
+          "src": "/phone-icon.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Our Services",
+      "short_name": "Services",
+      "description": "View our physiotherapy services",
+      "url": "/services",
+      "icons": [
+        {
+          "src": "/services-icon.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
