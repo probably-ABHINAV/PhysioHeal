@@ -1,10 +1,11 @@
+
 "use client"
 
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, XCircle, AlertTriangle, Clock } from "lucide-react"
 
 interface StatusBadgeProps {
-  status: 'pass' | 'fail' | 'warning' | 'running' | 'unknown' // ✅ Added 'unknown'
+  status: 'pass' | 'fail' | 'warning' | 'running'
   showIcon?: boolean
   size?: 'sm' | 'md' | 'lg'
 }
@@ -40,7 +41,6 @@ export function StatusBadge({ status, showIcon = true, size = 'md' }: StatusBadg
           icon: Clock,
           className: 'bg-blue-100 text-blue-800 border-blue-200 animate-pulse'
         }
-      case 'unknown': // ✅ Explicitly handle 'unknown'
       default:
         return {
           variant: 'outline' as const,

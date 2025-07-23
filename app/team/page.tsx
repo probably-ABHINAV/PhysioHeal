@@ -1,3 +1,4 @@
+import Image from 'next/image';
 "use client"
 
 import { motion } from "framer-motion"
@@ -87,7 +88,7 @@ export default function TeamPage() {
                     <div className={`grid lg:grid-cols-2 gap-0 ${index % 2 === 1 ? "lg:grid-flow-col-dense" : ""}`}>
                       {/* Image */}
                       <div className={`relative h-96 lg:h-auto ${index % 2 === 1 ? "lg:col-start-2" : ""}`}>
-                        <img
+                        <Image
                           src={member.image || "/placeholder.svg"}
                           alt={member.name}
                           className="w-full h-full object-cover"

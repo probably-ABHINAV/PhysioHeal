@@ -1,21 +1,21 @@
-"use client"
+import { DefaultSeo } from 'next-seo';
 
-import { FC } from "react"
-import { NextSeo, NextSeoProps } from "next-seo"
-
-type SeoProps = Omit<NextSeoProps, "canonical"> & {
-  canonical?: string
-}
-
-export const Seo: FC<SeoProps> = ({ canonical, ...props }) => {
-  const canonicalUrl = canonical || `https://physioheal.com`
-
+export default function SEO() {
   return (
-    <>
-      <NextSeo
-        {...props}
-        canonical={canonicalUrl}
-      />
-    </>
-  )
+    <DefaultSeo
+      title="PhysioHeal"
+      description="AI-powered physiotherapy platform."
+      openGraph={{
+        type: 'website',
+        locale: 'en_US',
+        url: process.env.SITE_URL || 'https://yourdomain.com',
+        site_name: 'PhysioHeal',
+      }}
+      twitter={{
+        handle: '@yourhandle',
+        site: '@yourhandle',
+        cardType: 'summary_large_image',
+      }}
+    />
+  );
 }
