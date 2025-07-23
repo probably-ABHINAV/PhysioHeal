@@ -7,7 +7,8 @@ export const organizationSchema: Organization = {
   url: "https://physioheal.com",
   logo: "https://physioheal.com/logo.png",
   image: "https://physioheal.com/og-image.jpg",
-  description: "Expert physiotherapy clinic with 5+ years experience in orthopedic care, sports injury recovery, and rehabilitation therapy.",
+  description:
+    "Expert physiotherapy clinic with 5+ years experience in orthopedic care, sports injury recovery, and rehabilitation therapy.",
   foundingDate: "2019",
   founder: {
     "@type": "Person",
@@ -33,7 +34,8 @@ export const localBusinessSchema: LocalBusiness = {
   "@id": "https://physioheal.com/#localbusiness",
   name: "PhysioHeal Clinic",
   image: "https://physioheal.com/clinic-exterior.jpg",
-  description: "Professional physiotherapy clinic offering comprehensive rehabilitation services, sports injury recovery, and orthopedic care.",
+  description:
+    "Professional physiotherapy clinic offering comprehensive rehabilitation services, sports injury recovery, and orthopedic care.",
   address: {
     "@type": "PostalAddress",
     streetAddress: "E-99, 201, 2nd floor, Dharam Colony, Palam Vihar",
@@ -72,31 +74,39 @@ export const medicalOrganizationSchema: MedicalOrganization = {
   "@type": "MedicalOrganization",
   "@id": "https://physioheal.com/#medicalorganization",
   name: "PhysioHeal Clinic",
-  medicalSpecialty: [
-    "Physiotherapy",
-    "Musculoskeletal",
-    "Neurologic",
-  ],
-  availableService: [
+  medicalSpecialty: ["Physiotherapy", "Musculoskeletal", "Neurologic"],
+  makesOffer: [
     {
-      "@type": "MedicalTherapy",
-      name: "Sports Injury Recovery",
-      description: "Specialized treatment for athletes and sports-related injuries",
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "MedicalTherapy",
+        name: "Sports Injury Recovery",
+        description: "Specialized treatment for athletes and sports-related injuries",
+      },
     },
     {
-      "@type": "MedicalTherapy",
-      name: "Pain Management",
-      description: "Comprehensive pain relief solutions using modern physiotherapy methods",
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "MedicalTherapy",
+        name: "Pain Management",
+        description: "Comprehensive pain relief solutions using modern physiotherapy methods",
+      },
     },
     {
-      "@type": "MedicalTherapy",
-      name: "Orthopedic Care",
-      description: "Expert care for bone, joint, and muscle conditions",
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "MedicalTherapy",
+        name: "Orthopedic Care",
+        description: "Expert care for bone, joint, and muscle conditions",
+      },
     },
     {
-      "@type": "MedicalTherapy",
-      name: "Rehabilitation Therapy",
-      description: "Complete rehabilitation programs for post-surgery recovery",
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "MedicalTherapy",
+        name: "Rehabilitation Therapy",
+        description: "Complete rehabilitation programs for post-surgery recovery",
+      },
     },
   ],
 };
@@ -105,14 +115,10 @@ export const physicianSchema: Physician = {
   "@type": "Physician",
   "@id": "https://physioheal.com/#physician",
   name: "Dr. Priya Sharma",
-  jobTitle: "Lead Physiotherapist & Founder",
-  worksFor: {
-    "@type": "MedicalOrganization",
-    name: "PhysioHeal Clinic",
-  },
   medicalSpecialty: ["Physiotherapy", "Musculoskeletal"],
   image: "https://physioheal.com/dr-priya-sharma.jpg",
-  description: "Expert physiotherapist with 5+ years of experience in orthopedic rehabilitation and sports injury recovery.",
+  description:
+    "Expert physiotherapist with 5+ years of experience in orthopedic rehabilitation and sports injury recovery.",
 };
 
 export const faqSchema: FAQPage = {
@@ -123,7 +129,7 @@ export const faqSchema: FAQPage = {
       name: "What conditions do you treat at PhysioHeal Clinic?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "We treat a wide range of conditions including sports injury rehabilitation, neurological conditions, and chronic pain management.",
+        text: "We treat a wide range of conditions including sports injuries, back pain, neck pain, joint problems, post-surgery rehabilitation, neurological conditions, and chronic pain management.",
       },
     },
     {
