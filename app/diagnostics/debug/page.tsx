@@ -1,7 +1,8 @@
 
 "use client"
 
-import { SupabaseDiagnostics } from "@/components/supabase-diagnostics"
+import SupabaseDiagnostics from "@/components/supabase-diagnostics"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertTriangle } from "lucide-react"
 
