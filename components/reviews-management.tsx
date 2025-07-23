@@ -36,7 +36,11 @@ import {
 } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export default function ReviewsManagement() {
+type ReviewsManagementProps = {
+  onUpdate?: () => void
+}
+
+export default function ReviewsManagement({ onUpdate }: ReviewsManagementProps) {
   const [reviews, setReviews] = useState<Review[]>([])
   const [sortField, setSortField] = useState<keyof Review | null>(null)
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
@@ -47,6 +51,7 @@ export default function ReviewsManagement() {
     const fetchReviews = async () => {
       const allReviews = await getReviews()
       setReviews(allReviews)
+      onUpdate?.() // Safe optional call
     }
     fetchReviews()
   }, [])
