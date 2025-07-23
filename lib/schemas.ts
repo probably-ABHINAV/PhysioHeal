@@ -1,4 +1,11 @@
-import type { Organization, LocalBusiness, Physician, MedicalOrganization, FAQPage, MedicalSpecialty } from "schema-dts"
+import type {
+  Organization,
+  LocalBusiness,
+  Physician,
+  MedicalOrganization,
+  FAQPage,
+  MedicalSpecialty,
+} from "schema-dts";
 
 export const organizationSchema: Organization = {
   "@type": "Organization",
@@ -13,7 +20,6 @@ export const organizationSchema: Organization = {
   founder: {
     "@type": "Person",
     name: "Dr. Priya Sharma",
-    jobTitle: "Lead Physiotherapist",
     alumniOf: "BPT, MPT Ortho",
   },
   contactPoint: {
@@ -28,7 +34,7 @@ export const organizationSchema: Organization = {
     "https://www.instagram.com/physioheal",
     "https://www.linkedin.com/company/physioheal",
   ],
-}
+};
 
 export const localBusinessSchema: LocalBusiness = {
   "@type": "LocalBusiness",
@@ -69,7 +75,7 @@ export const localBusinessSchema: LocalBusiness = {
   priceRange: "₹₹",
   paymentAccepted: ["Cash", "Credit Card", "UPI", "Bank Transfer"],
   currenciesAccepted: "INR",
-}
+};
 
 export const medicalOrganizationSchema: MedicalOrganization = {
   "@type": "MedicalOrganization",
@@ -82,46 +88,27 @@ export const medicalOrganizationSchema: MedicalOrganization = {
     "PainManagement" as MedicalSpecialty,
     "Neurologic" as MedicalSpecialty,
   ],
-  medicalService: [
-    {
-      "@type": "MedicalTherapy",
-      name: "Sports Injury Recovery",
-      description: "Specialized treatment for athletes and sports-related injuries",
-    },
-    {
-      "@type": "MedicalTherapy",
-      name: "Pain Management",
-      description: "Comprehensive pain relief solutions using modern physiotherapy methods",
-    },
-    {
-      "@type": "MedicalTherapy",
-      name: "Orthopedic Care",
-      description: "Expert care for bone, joint, and muscle conditions",
-    },
-    {
-      "@type": "MedicalTherapy",
-      name: "Rehabilitation Therapy",
-      description: "Complete rehabilitation programs for post-surgery recovery",
-    },
-  ],
-} as any
+  // Removed availableService since it's not in MedicalOrganizationLeaf
+};
 
 export const physicianSchema: Physician = {
   "@type": "Physician",
   "@id": "https://physioheal.com/#physician",
   name: "Dr. Priya Sharma",
-  jobTitle: "Lead Physiotherapist & Founder",
+  hasOccupation: {
+    "@type": "Occupation",
+    name: "Lead Physiotherapist & Founder",
+  },
   worksFor: {
     "@type": "MedicalOrganization",
     name: "PhysioHeal Clinic",
   },
-  medicalSpecialty: ["Physiotherapy", "Orthopedic"] as MedicalSpecialty[],
+  medicalSpecialty: ["Physiotherapy", "Orthopedic"],
   alumniOf: "BPT, MPT Ortho",
-  yearsOfExperience: "5+",
   image: "https://physioheal.com/dr-priya-sharma.jpg",
   description:
     "Expert physiotherapist with 5+ years of experience in orthopedic rehabilitation and sports injury recovery.",
-}
+};
 
 export const faqSchema: FAQPage = {
   "@type": "FAQPage",
@@ -159,4 +146,4 @@ export const faqSchema: FAQPage = {
       },
     },
   ],
-}
+};
