@@ -1,6 +1,6 @@
-import type { Organization, LocalBusiness, Physician, MedicalOrganization, FAQPage } from "schema-dts";
+import type { Organization, LocalBusiness, Physician, MedicalOrganization, FAQPage } from "schema-dts"
 
-export const organizationSchema: Organization = {
+export const organizationSchema = {
   "@type": "Organization",
   "@id": "https://physioheal.com/#organization",
   name: "PhysioHeal Clinic",
@@ -14,6 +14,7 @@ export const organizationSchema: Organization = {
     "@type": "Person",
     name: "Dr. Priya Sharma",
     jobTitle: "Lead Physiotherapist",
+    alumniOf: "BPT, MPT Ortho",
   },
   contactPoint: {
     "@type": "ContactPoint",
@@ -27,9 +28,9 @@ export const organizationSchema: Organization = {
     "https://www.instagram.com/physioheal",
     "https://www.linkedin.com/company/physioheal",
   ],
-};
+} as unknown as Organization
 
-export const localBusinessSchema: LocalBusiness = {
+export const localBusinessSchema = {
   "@type": "LocalBusiness",
   "@id": "https://physioheal.com/#localbusiness",
   name: "PhysioHeal Clinic",
@@ -38,7 +39,7 @@ export const localBusinessSchema: LocalBusiness = {
     "Professional physiotherapy clinic offering comprehensive rehabilitation services, sports injury recovery, and orthopedic care.",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "E-99, 201, 2nd floor, Dharam Colony, Palam Vihar",
+    streetAddress: "E-99, 201, 2nd floor, dhram colony, palam vihar",
     addressLocality: "Gurgaon",
     addressRegion: "Haryana",
     postalCode: "122017",
@@ -68,60 +69,61 @@ export const localBusinessSchema: LocalBusiness = {
   priceRange: "₹₹",
   paymentAccepted: ["Cash", "Credit Card", "UPI", "Bank Transfer"],
   currenciesAccepted: "INR",
-};
+} as unknown as LocalBusiness
 
-export const medicalOrganizationSchema: MedicalOrganization = {
+export const medicalOrganizationSchema = {
   "@type": "MedicalOrganization",
   "@id": "https://physioheal.com/#medicalorganization",
   name: "PhysioHeal Clinic",
-  medicalSpecialty: ["Physiotherapy", "Musculoskeletal", "Neurologic"],
-  makesOffer: [
+  medicalSpecialty: [
+    "Physiotherapy",
+    "Orthopedic Rehabilitation",
+    "Sports Medicine",
+    "Pain Management",
+    "Neurological Rehabilitation",
+  ],
+  availableService: [
     {
-      "@type": "Offer",
-      itemOffered: {
-        "@type": "MedicalTherapy",
-        name: "Sports Injury Recovery",
-        description: "Specialized treatment for athletes and sports-related injuries",
-      },
+      "@type": "MedicalTherapy",
+      name: "Sports Injury Recovery",
+      description: "Specialized treatment for athletes and sports-related injuries",
     },
     {
-      "@type": "Offer",
-      itemOffered: {
-        "@type": "MedicalTherapy",
-        name: "Pain Management",
-        description: "Comprehensive pain relief solutions using modern physiotherapy methods",
-      },
+      "@type": "MedicalTherapy",
+      name: "Pain Management",
+      description: "Comprehensive pain relief solutions using modern physiotherapy methods",
     },
     {
-      "@type": "Offer",
-      itemOffered: {
-        "@type": "MedicalTherapy",
-        name: "Orthopedic Care",
-        description: "Expert care for bone, joint, and muscle conditions",
-      },
+      "@type": "MedicalTherapy",
+      name: "Orthopedic Care",
+      description: "Expert care for bone, joint, and muscle conditions",
     },
     {
-      "@type": "Offer",
-      itemOffered: {
-        "@type": "MedicalTherapy",
-        name: "Rehabilitation Therapy",
-        description: "Complete rehabilitation programs for post-surgery recovery",
-      },
+      "@type": "MedicalTherapy",
+      name: "Rehabilitation Therapy",
+      description: "Complete rehabilitation programs for post-surgery recovery",
     },
   ],
-};
+} as unknown as MedicalOrganization
 
-export const physicianSchema: Physician = {
+export const physicianSchema = {
   "@type": "Physician",
   "@id": "https://physioheal.com/#physician",
   name: "Dr. Priya Sharma",
-  medicalSpecialty: ["Physiotherapy", "Musculoskeletal"],
+  jobTitle: "Lead Physiotherapist & Founder",
+  worksFor: {
+    "@type": "MedicalOrganization",
+    name: "PhysioHeal Clinic",
+  },
+  medicalSpecialty: ["Physiotherapy", "Orthopedic Rehabilitation"],
+  alumniOf: "BPT, MPT Ortho",
+  yearsOfExperience: "5+",
   image: "https://physioheal.com/dr-priya-sharma.jpg",
   description:
     "Expert physiotherapist with 5+ years of experience in orthopedic rehabilitation and sports injury recovery.",
-};
+} as unknown as Physician
 
-export const faqSchema: FAQPage = {
+export const faqSchema = {
   "@type": "FAQPage",
   mainEntity: [
     {
@@ -157,4 +159,4 @@ export const faqSchema: FAQPage = {
       },
     },
   ],
-};
+} as unknown as FAQPage
