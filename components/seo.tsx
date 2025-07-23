@@ -1,29 +1,23 @@
-import { NextSeo, type NextSeoProps } from "next-seo"
-import type { Thing } from "schema-dts"
-import React from "react";
+// components/seo.tsx
 
-interface SEOProps extends NextSeoProps {
-  schema?: Thing
-  canonical?: string
+"use client"
+
+import { FC } from "react"
+import { NextSeo, NextSeoProps } from "next-seo"
+import { ModifiedJsonLd } from "./jsonld"
+
+type SeoProps = NextSeoProps & {
+  schema?: Record<string, any>
+  canonical?: string // ✅ ADD THIS LINE
 }
 
-// Modified JsonLd component to fix hydration mismatch
-function ModifiedJsonLd({ item }: { item: any }) {
-  if (!item) return null;
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
-      suppressHydrationWarning={true}
-    />
-  );
-}
-
-export function SEO({ schema, canonical, ...props }: SEOProps) {
+export const SEO: FC<SeoProps> = ({ schema, canonical, ...props }) => {
   return (
     <>
-      <NextSeo {...props} canonical={canonical || `https://physioheal.com${props.canonical || ""}`} />
+      <NextSeo
+        {...props}
+        canonical={canonical || `https://physioheal.com${props.canonical || ""}`}
+      />
       {schema && <ModifiedJsonLd item={schema} />}
     </>
   )
