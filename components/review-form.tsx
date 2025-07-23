@@ -1,227 +1,63 @@
-"use client"
-
-import { useState, Dispatch, SetStateAction, FormEvent } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { motion } from "framer-motion"
-import { Star, CheckCircle2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
-import { createClient } from "@/lib/supabase"
+import { Star } from "lucide-react"
 
-const reviewSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Enter a valid email").optional().or(z.literal("")),
-  rating: z.number().min(1, "Select a rating").max(5),
-  comment: z.string().min(10, "Review must be at least 10 characters"),
-  service: z.string().optional(),
-})
-
-type ReviewFormData = z.infer<typeof reviewSchema>
-
-type Props = {
-  formData?: ReviewFormData
-  setFormData?: Dispatch<SetStateAction<ReviewFormData>>
-  handleSubmit?: (e: FormEvent<HTMLFormElement>) => Promise<void>
-  isSubmitting?: boolean
+interface ReviewFormProps {
+  formData: {
+    name: string
+    email: string
+    rating: number
+    comment: string
+    service: string
+  }
+  setFormData: (data: any) => void
+  handleSubmit: (e: React.FormEvent) => void
+  isSubmitting: boolean
 }
 
-export function ReviewForm(props: Props) {
-  const [isSubmittingLocal, setIsSubmittingLocal] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [selectedRating, setSelectedRating] = useState(0)
-  const { toast } = useToast()
-  const supabase = createClient()
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    setValue,
-    watch,
-  } = useForm<ReviewFormData>({
-    resolver: zodResolver(reviewSchema),
-    defaultValues: props.formData,
-  })
-
-  const selectedService = watch("service")
-
-  const onSubmit = async (data: ReviewFormData) => {
-    if (props.handleSubmit) return // handled by parent
-    setIsSubmittingLocal(true)
-    try {
-      const reviewData = {
-        name: data.name,
-        email: data.email || null,
-        rating: data.rating,
-        comment: data.comment,
-        approved: false,
-      }
-
-      const { error } = await supabase.from("reviews").insert(reviewData)
-
-      if (error) throw error
-
-      setIsSuccess(true)
-      reset()
-      setSelectedRating(0)
-
-      toast({
-        title: "Review Submitted!",
-        description:
-          "Thank you for your feedback. Your review will be published after approval.",
-      })
-    } catch (error: any) {
-      toast({
-        title: "Submission Failed",
-        description:
-          error.message || "An error occurred. Please try again later.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSubmittingLocal(false)
-    }
+export function ReviewForm({ formData, setFormData, handleSubmit, isSubmitting }: ReviewFormProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData({ ...formData, [name]: value })
   }
 
-  const handleRatingClick = (rating: number) => {
-    setSelectedRating(rating)
-    setValue("rating", rating)
-    if (props.setFormData) {
-      props.setFormData((prev) => ({ ...prev, rating }))
-    }
-  }
-
-  if (isSuccess) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="text-center p-8 bg-green-50 rounded-2xl border border-green-200"
-      >
-        <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h3 className="text-2xl font-bold text-green-800 mb-2">
-          Review Submitted!
-        </h3>
-        <p className="text-green-600 mb-4">
-          Thank you for your feedback. Your review will be published after
-          approval.
-        </p>
-      </motion.div>
-    )
+  const handleRating = (rating: number) => {
+    setFormData({ ...formData, rating })
   }
 
   return (
-    <motion.form
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      onSubmit={props.handleSubmit || handleSubmit(onSubmit)}
-      className="space-y-6"
-    >
-      <div className="space-y-2">
-        <Label htmlFor="name">Your Name</Label>
-        <Input
-          id="name"
-          {...register("name")}
-          placeholder="Enter your name"
-          className={errors.name ? "border-red-500" : ""}
-        />
-        {errors.name && (
-          <p className="text-sm text-red-500">{errors.name.message}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="email">Email (Optional)</Label>
-        <Input
-          id="email"
-          type="email"
-          {...register("email")}
-          placeholder="Enter your email (optional)"
-          className={errors.email ? "border-red-500" : ""}
-        />
-        {errors.email && (
-          <p className="text-sm text-red-500">{errors.email.message}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label>Rating</Label>
-        <div className="flex space-x-1">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Star
-              key={star}
-              className={`w-6 h-6 cursor-pointer transition-colors ${
-                star <= selectedRating
-                  ? "text-yellow-400 fill-current"
-                  : "text-gray-300"
-              }`}
-              onClick={() => handleRatingClick(star)}
-            />
-          ))}
-        </div>
-        {errors.rating && (
-          <p className="text-sm text-red-500">{errors.rating.message}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="service">Service (Optional)</Label>
-        <Select onValueChange={(value) => setValue("service", value)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a service" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="physiotherapy">Physiotherapy</SelectItem>
-            <SelectItem value="sports-injury">Sports Injury Recovery</SelectItem>
-            <SelectItem value="pain-management">Pain Management</SelectItem>
-            <SelectItem value="orthopedic">Orthopedic Care</SelectItem>
-            <SelectItem value="rehabilitation">Rehabilitation Therapy</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="comment">Your Review</Label>
-        <Textarea
-          id="comment"
-          {...register("comment")}
-          placeholder="Share your experience..."
-          rows={4}
-          className={errors.comment ? "border-red-500" : ""}
-        />
-        {errors.comment && (
-          <p className="text-sm text-red-500">{errors.comment.message}</p>
-        )}
-      </div>
-
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={props.isSubmitting ?? isSubmittingLocal}
-        size="lg"
-      >
-        {(props.isSubmitting ?? isSubmittingLocal) ? (
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex space-x-2">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            onClick={() => handleRating(i + 1)}
+            className={`w-6 h-6 cursor-pointer ${i < formData.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
           />
-        ) : (
-          "Submit Review"
-        )}
+        ))}
+      </div>
+      <div>
+        <Label>Name</Label>
+        <Input name="name" value={formData.name} onChange={handleChange} required />
+      </div>
+      <div>
+        <Label>Email</Label>
+        <Input type="email" name="email" value={formData.email} onChange={handleChange} required />
+      </div>
+      <div>
+        <Label>Service</Label>
+        <Input name="service" value={formData.service} onChange={handleChange} />
+      </div>
+      <div>
+        <Label>Comment</Label>
+        <Textarea name="comment" value={formData.comment} onChange={handleChange} required />
+      </div>
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Submitting..." : "Submit Review"}
       </Button>
-    </motion.form>
+    </form>
   )
 }

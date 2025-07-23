@@ -2,28 +2,26 @@ import { useEffect, useState } from "react"
 import { ReviewCard } from "@/components/review-card"
 import { ReviewForm } from "@/components/review-form"
 import { getReviews, submitReview } from "@/lib/supabase/reviews"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { toast } from "sonner"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function ReviewsPage() {
-  const [reviews, setReviews] = useState<Review[]>([])
+  const [reviews, setReviews] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [newReview, setNewReview] = useState({
     name: "",
-    email: "",
     rating: 0,
     comment: "",
-    service: "",
+    email: "",
+    service: ""
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     async function loadReviews() {
-      const { data, error } = await getReviews()
-      if (error) {
-        toast.error("Failed to load reviews")
-      } else {
-        setReviews(data || [])
-      }
+      const { data } = await getReviews()
+      setReviews(data || [])
+      setLoading(false)
     }
     loadReviews()
   }, [])
@@ -32,40 +30,46 @@ export default function ReviewsPage() {
     e.preventDefault()
     setIsSubmitting(true)
     const { error } = await submitReview(newReview)
-    if (error) {
-      toast.error("Failed to submit review")
-    } else {
-      toast.success("Review submitted successfully")
-      setNewReview({ name: "", email: "", rating: 0, comment: "", service: "" })
+    if (!error) {
       const { data } = await getReviews()
       setReviews(data || [])
+      setNewReview({ name: "", rating: 0, comment: "", email: "", service: "" })
     }
     setIsSubmitting(false)
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 py-8 px-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Share Your Experience</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ReviewForm
-            formData={newReview}
-            setFormData={setNewReview}
-            handleSubmit={handleSubmitReview}
-            isSubmitting={isSubmitting}
-          />
-        </CardContent>
-      </Card>
-
-      <div className="space-y-4">
-        {reviews.length === 0 ? (
-          <p className="text-center text-muted-foreground">No reviews yet.</p>
-        ) : (
-          reviews.map((review) => <ReviewCard key={review.id} review={review} />)
-        )}
-      </div>
-    </div>
+    <Tabs defaultValue="reviews" className="max-w-3xl mx-auto py-12">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="reviews">Patient Reviews</TabsTrigger>
+        <TabsTrigger value="submit">Submit Your Review</TabsTrigger>
+      </TabsList>
+      <TabsContent value="reviews">
+        <div className="space-y-4 mt-4">
+          {loading ? (
+            <p className="text-center text-muted-foreground">Loading reviews...</p>
+          ) : reviews.length > 0 ? (
+            reviews.map((review) => <ReviewCard key={review.id} review={review} />)
+          ) : (
+            <p className="text-center text-muted-foreground">No reviews yet.</p>
+          )}
+        </div>
+      </TabsContent>
+      <TabsContent value="submit">
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Leave a Review</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ReviewForm
+              formData={newReview}
+              setFormData={setNewReview}
+              handleSubmit={handleSubmitReview}
+              isSubmitting={isSubmitting}
+            />
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
   )
 }
