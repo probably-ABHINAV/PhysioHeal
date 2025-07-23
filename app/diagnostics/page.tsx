@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { Shield, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { SupabaseDiagnostics } from "@/components/supabase-diagnostics"
+import SupabaseDiagnostics from "@/components/supabase-diagnostics"
 import { useRouter } from "next/navigation"
 
 export default function DiagnosticsPage() {
