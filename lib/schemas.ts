@@ -5,7 +5,7 @@ import type {
   MedicalOrganization,
   FAQPage,
   MedicalSpecialty,
-} from "schema-dts";
+} from "schema-dts"
 
 export const organizationSchema: Organization = {
   "@type": "Organization",
@@ -20,6 +20,10 @@ export const organizationSchema: Organization = {
   founder: {
     "@type": "Person",
     name: "Dr. Priya Sharma",
+    hasOccupation: {
+      "@type": "Occupation",
+      name: "Lead Physiotherapist",
+    },
     alumniOf: "BPT, MPT Ortho",
   },
   contactPoint: {
@@ -34,7 +38,7 @@ export const organizationSchema: Organization = {
     "https://www.instagram.com/physioheal",
     "https://www.linkedin.com/company/physioheal",
   ],
-};
+}
 
 export const localBusinessSchema: LocalBusiness = {
   "@type": "LocalBusiness",
@@ -75,21 +79,20 @@ export const localBusinessSchema: LocalBusiness = {
   priceRange: "₹₹",
   paymentAccepted: ["Cash", "Credit Card", "UPI", "Bank Transfer"],
   currenciesAccepted: "INR",
-};
+}
 
 export const medicalOrganizationSchema: MedicalOrganization = {
   "@type": "MedicalOrganization",
   "@id": "https://physioheal.com/#medicalorganization",
   name: "PhysioHeal Clinic",
   medicalSpecialty: [
-    "Physiotherapy" as MedicalSpecialty,
-    "Orthopedic" as MedicalSpecialty,
+    "PhysicalTherapy" as MedicalSpecialty,
+    "OrthopedicSurgery" as MedicalSpecialty,
     "SportsMedicine" as MedicalSpecialty,
     "PainManagement" as MedicalSpecialty,
     "Neurologic" as MedicalSpecialty,
   ],
-  // Removed availableService since it's not in MedicalOrganizationLeaf
-};
+}
 
 export const physicianSchema: Physician = {
   "@type": "Physician",
@@ -103,12 +106,15 @@ export const physicianSchema: Physician = {
     "@type": "MedicalOrganization",
     name: "PhysioHeal Clinic",
   },
-  medicalSpecialty: ["Physiotherapy", "Orthopedic"],
+  medicalSpecialty: [
+    "PhysicalTherapy" as MedicalSpecialty,
+    "OrthopedicSurgery" as MedicalSpecialty,
+  ],
   alumniOf: "BPT, MPT Ortho",
   image: "https://physioheal.com/dr-priya-sharma.jpg",
   description:
     "Expert physiotherapist with 5+ years of experience in orthopedic rehabilitation and sports injury recovery.",
-};
+}
 
 export const faqSchema: FAQPage = {
   "@type": "FAQPage",
@@ -146,4 +152,4 @@ export const faqSchema: FAQPage = {
       },
     },
   ],
-};
+}
