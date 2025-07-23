@@ -60,7 +60,13 @@ export default function ReviewsPage() {
       rating: newReview.rating,
       comment: newReview.review_text,
       service: newReview.service || null,
-    }
+    ,
+  approved: false
+,
+  email: ''
+,
+  updated_at: new Date().toISOString()
+}
 
     const addedReview = await addReview(reviewData)
 
