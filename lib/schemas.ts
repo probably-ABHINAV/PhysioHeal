@@ -20,10 +20,7 @@ export const organizationSchema: Organization = {
   founder: {
     "@type": "Person",
     name: "Dr. Priya Sharma",
-    hasOccupation: {
-      "@type": "Occupation",
-      name: "Lead Physiotherapist",
-    },
+    description: "Lead Physiotherapist & Founder",
     alumniOf: "BPT, MPT Ortho",
   },
   contactPoint: {
@@ -98,10 +95,7 @@ export const physicianSchema: Physician = {
   "@type": "Physician",
   "@id": "https://physioheal.com/#physician",
   name: "Dr. Priya Sharma",
-  hasOccupation: {
-    "@type": "Occupation",
-    name: "Lead Physiotherapist & Founder",
-  },
+  description: "Lead Physiotherapist & Founder at PhysioHeal Clinic",
   worksFor: {
     "@type": "MedicalOrganization",
     name: "PhysioHeal Clinic",
@@ -112,8 +106,6 @@ export const physicianSchema: Physician = {
   ],
   alumniOf: "BPT, MPT Ortho",
   image: "https://physioheal.com/dr-priya-sharma.jpg",
-  description:
-    "Expert physiotherapist with 5+ years of experience in orthopedic rehabilitation and sports injury recovery.",
 }
 
 export const faqSchema: FAQPage = {
