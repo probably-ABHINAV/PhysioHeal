@@ -71,7 +71,7 @@ export default function ReviewsPage() {
 
     if (addedReview) {
       setReviews([addedReview, ...reviews])
-      setNewReview({ name: "", rating: 5, review_text: "", service: "" })
+      setNewReview({ name: "", rating: 5, review_text: "", email: "", service: "" })
       setShowForm(false)
 
       toast({
