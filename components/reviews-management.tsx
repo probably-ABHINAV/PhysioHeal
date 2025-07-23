@@ -234,13 +234,16 @@ export function ReviewsManagement({ onUpdate }: ReviewsManagementProps) {
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1">
-              <Input
-                placeholder="Search reviews..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-                icon={<Search className="h-4 w-4" />}
-              />
+              <div className="relative w-full">
+  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+  <input
+    placeholder="Search..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="w-full pl-9"
+  />
+</div>
+
             </div>
             <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
               <SelectTrigger className="w-full sm:w-48">
