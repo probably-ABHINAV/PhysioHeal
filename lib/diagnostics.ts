@@ -869,7 +869,7 @@ export class DiagnosticsRunner {
 
       await logDiagnostic({
         test_name: result.name,
-        run_status: result.status,
+        run_status: result.status === "running" ? "warning" : result.status,
         logs: {
           id: result.id,
           message: result.message,
