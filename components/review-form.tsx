@@ -1,62 +1,69 @@
+// components/review-form.tsx
+"use client"
+
 import { useState } from "react"
+import { submitReview } from "@/lib/supabase/reviews"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Star } from "lucide-react"
 
-interface ReviewFormProps {
-  formData: {
-    name: string
-    email: string
-    rating: number
-    comment: string
-    service: string
-  }
-  setFormData: (data: any) => void
-  handleSubmit: (e: React.FormEvent) => void
-  isSubmitting: boolean
-}
+export function ReviewForm({ onSubmit }: { onSubmit: () => void }) {
+  const [form, setForm] = useState({
+    name: "",
+    rating: 5,
+    service: "",
+    comment: ""
+  })
+  const [loading, setLoading] = useState(false)
 
-export function ReviewForm({ formData, setFormData, handleSubmit, isSubmitting }: ReviewFormProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
+    setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleRating = (rating: number) => {
-    setFormData({ ...formData, rating })
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      await submitReview({ ...form, rating: Number(form.rating) })
+      setForm({ name: "", rating: 5, service: "", comment: "" })
+      onSubmit()
+    } catch (error) {
+      alert("Error submitting review")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex space-x-2">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            onClick={() => handleRating(i + 1)}
-            className={`w-6 h-6 cursor-pointer ${i < formData.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
-          />
-        ))}
-      </div>
       <div>
         <Label>Name</Label>
-        <Input name="name" value={formData.name} onChange={handleChange} required />
-      </div>
-      <div>
-        <Label>Email</Label>
-        <Input type="email" name="email" value={formData.email} onChange={handleChange} required />
+        <Input name="name" value={form.name} onChange={handleChange} required />
       </div>
       <div>
         <Label>Service</Label>
-        <Input name="service" value={formData.service} onChange={handleChange} />
+        <Input name="service" value={form.service} onChange={handleChange} required />
+      </div>
+      <div>
+        <Label>Rating</Label>
+        <Input
+          name="rating"
+          type="number"
+          min="1"
+          max="5"
+          value={form.rating}
+          onChange={handleChange}
+          required
+        />
       </div>
       <div>
         <Label>Comment</Label>
-        <Textarea name="comment" value={formData.comment} onChange={handleChange} required />
+        <Textarea name="comment" value={form.comment} onChange={handleChange} required />
       </div>
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Submitting..." : "Submit Review"}
+      <Button type="submit" disabled={loading}>
+        {loading ? "Submitting..." : "Submit Review"}
       </Button>
     </form>
   )
