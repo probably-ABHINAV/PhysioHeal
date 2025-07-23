@@ -33,7 +33,7 @@ import { FollowUpTracker } from "./follow-up-tracker"
 import { TimelineChart } from "./timeline-chart"
 import { FilterPanel } from "./filter-panel"
 import { WhatsAppCTA } from "./whatsapp-cta"
-import { ReviewsManagement } from "./reviews-management"
+import ReviewsManagement from "./reviews-management"
 import { useAdminData } from "@/lib/use-admin-data"
 import { useRealtime } from "@/lib/use-realtime"
 
