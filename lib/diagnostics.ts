@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase-server"
-import { Database } from "@/types/supabase"
+// lib/diagnostics.ts
+import { createServerClient } from "@/lib/supabase-server"
+import { type Database } from "@/types/supabase"
 import { z } from "zod"
 
 export type DiagnosticStatus = "pass" | "fail" | "warning" | "running" | "unknown"
@@ -16,14 +17,6 @@ export interface DiagnosticTest {
   critical?: boolean
 }
 
-export function getOverallStatus(tests: DiagnosticResult[]): DiagnosticStatus {
-  if (tests.some((t) => t.status === "fail")) return "fail"
-  if (tests.some((t) => t.status === "warning")) return "warning"
-  if (tests.some((t) => t.status === "running")) return "running"
-  if (tests.every((t) => t.status === "pass")) return "pass"
-  return "unknown"
-}
-
 export interface DiagnosticResult {
   id: string
   name: string
@@ -33,7 +26,7 @@ export interface DiagnosticResult {
 }
 
 function normalizeToSupabaseStatus(status: DiagnosticStatus): SupabaseLogStatus {
-  return status === "warning" || status === "pass" || status === "fail" ? status : "fail"
+  return ["pass", "fail", "warning"].includes(status) ? status as SupabaseLogStatus : "fail"
 }
 
 export async function logDiagnostic(result: {
@@ -45,7 +38,7 @@ export async function logDiagnostic(result: {
     meta?: Record<string, any>
   }
 }) {
-  const supabase = createClient()
+  const supabase = createServerClient()
   await supabase.from("diagnostic_logs").insert({
     test_name: result.test_name,
     run_status: result.run_status,
@@ -61,25 +54,13 @@ export async function runDiagnostics(tests: DiagnosticTest[]): Promise<Diagnosti
   for (const test of tests) {
     try {
       const { status, message, meta } = await test.run()
-
-      const result: DiagnosticResult = {
-        id: test.id,
-        name: test.name,
-        status,
-        message,
-        meta,
-      }
-
+      const result: DiagnosticResult = { id: test.id, name: test.name, status, message, meta }
       results.push(result)
 
       await logDiagnostic({
         test_name: test.name,
         run_status: normalizeToSupabaseStatus(status),
-        logs: {
-          id: test.id,
-          message,
-          meta,
-        },
+        logs: { id: test.id, message, meta },
       })
     } catch (err) {
       const failResult: DiagnosticResult = {
@@ -88,16 +69,12 @@ export async function runDiagnostics(tests: DiagnosticTest[]): Promise<Diagnosti
         status: "fail",
         message: (err as Error)?.message || "Unknown error",
       }
-
       results.push(failResult)
 
       await logDiagnostic({
         test_name: test.name,
         run_status: "fail",
-        logs: {
-          id: test.id,
-          message: failResult.message,
-        },
+        logs: { id: test.id, message: failResult.message },
       })
     }
   }
