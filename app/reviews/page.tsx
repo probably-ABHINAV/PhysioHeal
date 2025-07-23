@@ -61,8 +61,10 @@ export default function ReviewsPage() {
   comment: newReview.review_text,
   service: newReview.service || null,
   approved: false,
-  email: ''
+  email: '',
+  updated_at: new Date().toISOString()
 }
+
 
 
     const addedReview = await addReview(reviewData)
