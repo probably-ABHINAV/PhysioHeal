@@ -13,10 +13,12 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
-      suppressHydrationWarning
       {...props}
     >
-      {children}
+      {/* If you want to suppress hydration warnings, apply it to a wrapper div */}
+      <div suppressHydrationWarning>
+        {children}
+      </div>
     </NextThemesProvider>
   )
 }
