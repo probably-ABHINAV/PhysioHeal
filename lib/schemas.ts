@@ -1,11 +1,4 @@
-import type { 
-  Organization, 
-  LocalBusiness, 
-  Physician, 
-  MedicalOrganization, 
-  FAQPage, 
-  MedicalSpecialty 
-} from "schema-dts"
+import type { Organization, LocalBusiness, Physician, MedicalOrganization, FAQPage, MedicalSpecialty } from "schema-dts"
 
 export const organizationSchema: Organization = {
   "@type": "Organization",
@@ -89,7 +82,7 @@ export const medicalOrganizationSchema: MedicalOrganization = {
     "PainManagement" as MedicalSpecialty,
     "Neurologic" as MedicalSpecialty,
   ],
-  availableService: [
+  medicalService: [
     {
       "@type": "MedicalTherapy",
       name: "Sports Injury Recovery",
@@ -111,7 +104,7 @@ export const medicalOrganizationSchema: MedicalOrganization = {
       description: "Complete rehabilitation programs for post-surgery recovery",
     },
   ],
-}
+} as any
 
 export const physicianSchema: Physician = {
   "@type": "Physician",
@@ -122,10 +115,7 @@ export const physicianSchema: Physician = {
     "@type": "MedicalOrganization",
     name: "PhysioHeal Clinic",
   },
-  medicalSpecialty: [
-    "Physiotherapy" as MedicalSpecialty,
-    "Orthopedic" as MedicalSpecialty
-  ],
+  medicalSpecialty: ["Physiotherapy", "Orthopedic"] as MedicalSpecialty[],
   alumniOf: "BPT, MPT Ortho",
   yearsOfExperience: "5+",
   image: "https://physioheal.com/dr-priya-sharma.jpg",
